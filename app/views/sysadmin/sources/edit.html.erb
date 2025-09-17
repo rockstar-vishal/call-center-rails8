@@ -1,0 +1,31 @@
+<% content_for :page_title, "Edit Source" %>
+
+<div class="max-w-md mx-auto">
+  <%= form_with(model: [:sysadmin, @source], local: true, class: "space-y-6") do |form| %>
+    <div class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
+      <div class="md:grid md:grid-cols-1 md:gap-6">
+        <div class="mt-5 md:mt-0">
+          <h3 class="text-lg font-medium leading-6 text-gray-900">Edit Source</h3>
+          <p class="mt-1 text-sm text-gray-500">Update source information.</p>
+        </div>
+
+        <div class="mt-6 space-y-6">
+          <div>
+            <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :name, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+
+          <div>
+            <%= form.label :tag, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :tag, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-2">
+      <%= link_to "Cancel", sysadmin_sources_path, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50" %>
+      <%= form.submit "Update Source", class: "bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700" %>
+    </div>
+  <% end %>
+</div>

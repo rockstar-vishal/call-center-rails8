@@ -1,0 +1,67 @@
+<% content_for :page_title, "Companies Management" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-xl font-semibold text-gray-900">Companies</h1>
+    <p class="mt-2 text-sm text-gray-700">A list of all companies in the system including their domain and lead limits.</p>
+  </div>
+  <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+    <%= link_to "Add company", new_sysadmin_company_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
+  </div>
+</div>
+
+<div class="mt-8 flex flex-col">
+  <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+      <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Company</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Domain</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Lead Limit</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Users</th>
+              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @companies.each do |company| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">
+                          <%= company.name.first.upcase %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900"><%= company.name %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= company.domain %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= company.lead_limit || 'Unlimited' %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= pluralize(company.users.count, 'user') %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to "View", sysadmin_company_path(company), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                  <%= link_to "Edit", edit_sysadmin_company_path(company), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                  <%= link_to "Delete", sysadmin_company_path(company), 
+                        data: { "turbo-method": :delete, "turbo-confirm": "Are you sure?" }, 
+                        class: "text-red-600 hover:text-red-900" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

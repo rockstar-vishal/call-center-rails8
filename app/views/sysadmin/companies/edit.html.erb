@@ -1,0 +1,215 @@
+<% content_for :page_title, "Edit Company" %>
+
+<div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full space-y-8">
+    <!-- Header Section -->
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
+        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">Edit Company</h2>
+      <p class="mt-2 text-sm text-gray-600">Update company information and branding</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white/80 backdrop-blur-sm shadow-2xl rounded-3xl border border-gray-200/50">
+      <%= form_with(model: [:sysadmin, @company], local: true, class: "p-8 space-y-8") do |form| %>
+        <!-- Error Messages -->
+        <% if @company.errors.any? %>
+          <div class="rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200 p-6">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-base font-semibold text-red-800">
+                  Please fix the following <%= pluralize(@company.errors.count, "error") %>:
+                </h3>
+                <ul class="mt-3 text-sm text-red-700 space-y-2">
+                  <% @company.errors.full_messages.each do |message| %>
+                    <li class="flex items-center">
+                      <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-3"></span>
+                      <%= message %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Current Logo/Icon Display -->
+        <% if @company.has_logo? || @company.has_icon? %>
+          <div class="rounded-2xl bg-blue-50/80 backdrop-blur-sm border border-blue-200 p-6">
+            <h3 class="text-base font-semibold text-blue-800 mb-4">Current Branding</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <% if @company.has_logo? %>
+                <div>
+                  <p class="text-sm font-medium text-blue-700 mb-2">Current Logo</p>
+                  <div class="bg-white rounded-xl p-4 border border-blue-200">
+                    <%= image_tag @company.display_logo_url, 
+                          class: "h-12 w-auto max-w-full object-contain mx-auto", 
+                          alt: "Current Logo" %>
+                  </div>
+                </div>
+              <% end %>
+              <% if @company.has_icon? %>
+                <div>
+                  <p class="text-sm font-medium text-blue-700 mb-2">Current Icon</p>
+                  <div class="bg-white rounded-xl p-4 border border-blue-200 flex justify-center">
+                    <%= image_tag @company.display_icon_url, 
+                          class: "h-12 w-12 object-contain", 
+                          alt: "Current Icon" %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Form Fields -->
+        <div class="space-y-8">
+          <!-- Company Name -->
+          <div>
+            <%= form.label :name, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+              <span class="flex items-center">
+                <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Company Name
+              </span>
+            <% end %>
+            <%= form.text_field :name, 
+                  class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                  placeholder: "Enter company name..." %>
+          </div>
+
+          <!-- Domain and Lead Limit Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <%= form.label :domain, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+                <span class="flex items-center">
+                  <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0 9c-5 0-9-4-9-9s4-9 9-9"></path>
+                  </svg>
+                  Domain
+                </span>
+              <% end %>
+              <%= form.text_field :domain, 
+                    class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                    placeholder: "example.com" %>
+            </div>
+
+            <div>
+              <%= form.label :lead_limit, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+                <span class="flex items-center">
+                  <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                  Lead Limit
+                </span>
+              <% end %>
+              <%= form.number_field :lead_limit, 
+                    class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                    placeholder: "Leave empty for unlimited" %>
+              <p class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="h-4 w-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Leave empty for unlimited leads
+              </p>
+            </div>
+          </div>
+
+          <!-- CRM Domain -->
+          <div>
+            <%= form.label :crm_domain, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+              <span class="flex items-center">
+                <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                CRM Domain 
+                <span class="text-sm font-normal text-gray-500 ml-2">(optional)</span>
+              </span>
+            <% end %>
+            <%= form.text_field :crm_domain, 
+                  class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                  placeholder: "crm.example.com" %>
+          </div>
+
+          <!-- Logo and Icon Upload Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Company Logo -->
+            <div>
+              <%= form.label :logo, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+                <span class="flex items-center">
+                  <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  Company Logo
+                  <span class="text-sm font-normal text-gray-500 ml-2">(optional)</span>
+                </span>
+              <% end %>
+              <%= form.file_field :logo, 
+                    class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100",
+                    accept: "image/*" %>
+              <p class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="h-4 w-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                PNG, JPG, GIF, SVG up to 2MB
+              </p>
+            </div>
+
+            <!-- Company Icon -->
+            <div>
+              <%= form.label :icon, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+                <span class="flex items-center">
+                  <svg class="h-5 w-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1h2z"></path>
+                  </svg>
+                  Company Icon
+                  <span class="text-sm font-normal text-gray-500 ml-2">(optional)</span>
+                </span>
+              <% end %>
+              <%= form.file_field :icon, 
+                    class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100",
+                    accept: "image/*" %>
+              <p class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="h-4 w-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                PNG, JPG, GIF, SVG, ICO up to 1MB
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="bg-gray-50/80 backdrop-blur-sm px-8 py-6 -mx-8 -mb-8 rounded-b-3xl flex justify-between items-center">
+          <%= link_to sysadmin_company_path(@company), 
+                class: "inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-2xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200" do %>
+            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Cancel
+          <% end %>
+          
+          <%= form.submit "Update Company", 
+                class: "inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 shadow-lg hover:shadow-xl" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Help Text -->
+    <div class="text-center">
+      <p class="text-sm text-gray-500">
+        Need help? Contact your system administrator for assistance.
+      </p>
+    </div>
+  </div>
+</div>

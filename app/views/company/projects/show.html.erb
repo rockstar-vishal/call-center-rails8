@@ -1,0 +1,95 @@
+<% content_for :page_title, "Project Details" %>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900"><%= @project.name %></h3>
+    <p class="mt-1 max-w-2xl text-sm text-gray-500">Project information and statistics.</p>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Project name</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @project.name %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Total leads</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= pluralize(@leads_count, 'lead') %></dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Created</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @project.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<!-- Recent Leads -->
+<div class="mt-8 bg-white shadow sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Leads</h3>
+    <p class="mt-1 text-sm text-gray-500">Latest leads assigned to this project.</p>
+  </div>
+  <div class="px-4 py-5 sm:p-6">
+    <% if @recent_leads.any? %>
+      <div class="space-y-4">
+        <% @recent_leads.each do |lead| %>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-8 w-8">
+                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                  <span class="text-white text-xs font-medium">
+                    <%= lead.name&.first&.upcase || 'L' %>
+                  </span>
+                </div>
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900"><%= lead.name %></div>
+                <div class="text-sm text-gray-500">
+                  <%= lead.email %> • 
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                    <%= case lead.status.tag
+                        when 'new' then 'bg-gray-100 text-gray-800'
+                        when 'contacted' then 'bg-blue-100 text-blue-800'
+                        when 'interested' then 'bg-green-100 text-green-800'
+                        when 'not_interested' then 'bg-red-100 text-red-800'
+                        when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+                        when 'converted' then 'bg-green-100 text-green-800'
+                        when 'lost' then 'bg-red-100 text-red-800'
+                        else 'bg-gray-100 text-gray-800'
+                        end %>">
+                    <%= lead.status.name %>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="text-sm text-gray-500">
+              <%= time_ago_in_words(lead.created_at) %> ago
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div class="mt-6">
+        <%= link_to "View all leads", company_leads_path(project_id: @project.id), class: "text-sm text-blue-600 hover:text-blue-500" %>
+      </div>
+    <% else %>
+      <div class="text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No leads</h3>
+        <p class="mt-1 text-sm text-gray-500">This project doesn't have any leads yet.</p>
+        <div class="mt-6">
+          <%= link_to "Add lead", new_company_lead_path(project_id: @project.id), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-6 flex space-x-3">
+  <%= link_to "Edit Project", edit_company_project_path(@project), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  <%= link_to "Back to Projects", company_projects_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  <%= link_to "Delete Project", company_project_path(@project), 
+        data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete this project?" }, 
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+</div>

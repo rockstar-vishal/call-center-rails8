@@ -1,0 +1,70 @@
+<% content_for :page_title, "Users Management" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-xl font-semibold text-gray-900">Users</h1>
+    <p class="mt-2 text-sm text-gray-700">A list of all users in the system including their name, email, company, and role.</p>
+  </div>
+  <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+    <%= link_to "Add user", new_sysadmin_user_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
+  </div>
+</div>
+
+<div class="mt-8 flex flex-col">
+  <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+      <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">User</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Company</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Role</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Phone</th>
+              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @users.each do |user| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">
+                          <%= user.name&.first&.upcase || user.email&.first&.upcase %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900"><%= user.name || user.email %></div>
+                      <div class="text-sm text-gray-500"><%= user.email %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= user.company.name %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-<%= user.role.tag == 'sysad' ? 'purple' : 'blue' %>-100 text-<%= user.role.tag == 'sysad' ? 'purple' : 'blue' %>-800">
+                    <%= user.role.name %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= user.phone || '-' %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to "View", sysadmin_user_path(user), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                  <%= link_to "Edit", edit_sysadmin_user_path(user), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+                  <%= link_to "Delete", sysadmin_user_path(user), 
+                        data: { "turbo-method": :delete, "turbo-confirm": "Are you sure?" }, 
+                        class: "text-red-600 hover:text-red-900" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

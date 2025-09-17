@@ -1,0 +1,163 @@
+<% content_for :page_title, "Lead Details" %>
+
+<div class="lg:flex lg:items-center lg:justify-between mb-8">
+  <div class="flex-1 min-w-0">
+    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+      <%= @lead.name %>
+    </h2>
+    <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+      <div class="mt-2 flex items-center text-sm text-gray-500">
+        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+        </svg>
+        <%= @lead.email %>
+      </div>
+      <div class="mt-2 flex items-center text-sm text-gray-500">
+        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+        </svg>
+        <%= @lead.phone %>
+      </div>
+    </div>
+  </div>
+  <div class="mt-5 flex lg:mt-0 lg:ml-4">
+    <%= link_to "Edit Lead", edit_company_lead_path(@lead), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" %>
+  </div>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Lead Information</h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Project</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.project.name %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+            <%= case @lead.status.tag
+                when 'new' then 'bg-gray-100 text-gray-800'
+                when 'contacted' then 'bg-blue-100 text-blue-800'
+                when 'interested' then 'bg-green-100 text-green-800'
+                when 'not_interested' then 'bg-red-100 text-red-800'
+                when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+                when 'converted' then 'bg-green-100 text-green-800'
+                when 'lost' then 'bg-red-100 text-red-800'
+                else 'bg-gray-100 text-gray-800'
+                end %>">
+            <%= @lead.status.name %>
+          </span>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Assigned to</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.user.name || @lead.user.email %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Next call date</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= @lead.ncd ? @lead.ncd.strftime("%B %d, %Y at %I:%M %p") : 'Not scheduled' %>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Comments</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= @lead.comment.present? ? simple_format(@lead.comment) : 'No comments' %>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Created</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<!-- Call Logs -->
+<div class="bg-white shadow sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Call History</h3>
+    <p class="mt-1 text-sm text-gray-500">Recent call logs and interactions with this lead.</p>
+  </div>
+  <div class="px-4 py-5 sm:p-6">
+    <% if @call_logs.any? %>
+      <div class="flow-root">
+        <ul class="-mb-8">
+          <% @call_logs.each_with_index do |call_log, index| %>
+            <li>
+              <div class="relative pb-8">
+                <% unless index == @call_logs.length - 1 %>
+                  <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                <% end %>
+                <div class="relative flex space-x-3">
+                  <div>
+                    <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                      <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                    <div>
+                      <p class="text-sm text-gray-500">
+                        Call by <span class="font-medium text-gray-900"><%= call_log.user.name || call_log.user.email %></span>
+                      </p>
+                      <p class="text-sm text-gray-500 mt-1">
+                        Status updated to: 
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                          <%= case call_log.status.tag
+                              when 'new' then 'bg-gray-100 text-gray-800'
+                              when 'contacted' then 'bg-blue-100 text-blue-800'
+                              when 'interested' then 'bg-green-100 text-green-800'
+                              when 'not_interested' then 'bg-red-100 text-red-800'
+                              when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+                              when 'converted' then 'bg-green-100 text-green-800'
+                              when 'lost' then 'bg-red-100 text-red-800'
+                              else 'bg-gray-100 text-gray-800'
+                              end %>">
+                          <%= call_log.status.name %>
+                        </span>
+                      </p>
+                      <% if call_log.comment.present? %>
+                        <div class="mt-2 text-sm text-gray-700 bg-gray-50 rounded-md p-3">
+                          <%= simple_format(call_log.comment) %>
+                        </div>
+                      <% end %>
+                      <% if call_log.ncd %>
+                        <p class="text-sm text-gray-500 mt-2">
+                          Next call scheduled: <%= call_log.ncd.strftime("%B %d, %Y at %I:%M %p") %>
+                        </p>
+                      <% end %>
+                    </div>
+                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                      <time><%= time_ago_in_words(call_log.created_at) %> ago</time>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No call history</h3>
+        <p class="mt-1 text-sm text-gray-500">This lead hasn't been contacted yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-6 flex space-x-3">
+  <%= link_to "Back to Leads", company_leads_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+  <%= link_to "Delete Lead", company_lead_path(@lead), 
+        data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete this lead?" }, 
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700" %>
+</div>

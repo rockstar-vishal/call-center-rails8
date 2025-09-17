@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  company: one
+  email: MyString
+  phone: MyString
+  project: one
+  status: one
+  comment: MyText
+  user: one
+  ncd: 2025-09-17 14:05:14
+  crm_created: false
+  crm_lead_no: MyString
+  crm_response: MyText
+
+two:
+  name: MyString
+  company: two
+  email: MyString
+  phone: MyString
+  project: two
+  status: two
+  comment: MyText
+  user: two
+  ncd: 2025-09-17 14:05:14
+  crm_created: false
+  crm_lead_no: MyString
+  crm_response: MyText

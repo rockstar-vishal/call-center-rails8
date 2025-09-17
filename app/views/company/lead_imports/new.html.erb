@@ -1,0 +1,165 @@
+<% content_for :page_title, "Import Leads" %>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-12">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">Import Leads from CSV</h1>
+      <p class="text-lg text-gray-600">Upload a CSV file to import multiple leads at once</p>
+    </div>
+
+    <!-- Import Form Card -->
+    <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl shadow-gray-200/50 border border-white/20 overflow-hidden mb-8">
+      <%= form_with url: company_lead_imports_path, multipart: true, local: true, class: "space-y-0" do |form| %>
+        
+        <!-- Form Fields -->
+        <div class="p-8 space-y-8">
+          
+          <!-- File Upload Section -->
+          <div class="space-y-6">
+            <div class="border-b border-gray-200 pb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Upload CSV File</h3>
+              <p class="text-sm text-gray-600 mt-1">Select a CSV file containing your lead data</p>
+            </div>
+
+            <div class="space-y-4" data-controller="file-upload">
+              <div data-file-upload-target="dropzone" class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors duration-200">
+                <div class="space-y-2 text-center">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <div class="text-sm text-gray-600">
+                    <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                      <span>Upload a CSV file</span>
+                      <%= form.file_field :file, 
+                            id: "file-upload", 
+                            class: "sr-only", 
+                            accept: ".csv", 
+                            required: true,
+                            data: { 
+                              file_upload_target: "input",
+                              action: "change->file-upload#fileSelected"
+                            } %>
+                    </label>
+                    <p class="pl-1">or drag and drop</p>
+                  </div>
+                  <p class="text-xs text-gray-500">CSV files only, up to 10MB</p>
+                </div>
+              </div>
+
+              <!-- File name display (will be populated by Stimulus) -->
+              <div data-file-upload-target="info" class="hidden">
+                <div class="flex items-center p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+                  <svg class="h-5 w-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <span data-file-upload-target="name" class="text-sm font-medium text-blue-800"></span>
+                  <button type="button" 
+                          data-file-upload-target="removeButton"
+                          data-action="click->file-upload#removeFile"
+                          class="ml-auto text-blue-600 hover:text-blue-800">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions Section -->
+          <div class="space-y-6">
+            <div class="border-b border-gray-200 pb-4">
+              <h3 class="text-lg font-semibold text-gray-900">CSV Format Requirements</h3>
+              <p class="text-sm text-gray-600 mt-1">Your CSV file should follow these guidelines</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-6">
+              <h4 class="text-base font-semibold text-gray-900 mb-4">Required Columns:</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Name</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Email</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Phone Number</span>
+                </div>
+              </div>
+
+              <h4 class="text-base font-semibold text-gray-900 mb-4">Optional Columns:</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Project</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Status</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Assigned To</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Next Call Date</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span class="text-sm text-gray-700">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Important Notes -->
+          <div class="rounded-2xl bg-amber-50 border border-amber-200 p-6">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-base font-semibold text-amber-800">Important Notes</h4>
+                <ul class="text-sm text-amber-700 mt-2 space-y-1">
+                  <li>• Leads with existing email addresses will be skipped</li>
+                  <li>• Project names must match existing projects in your company</li>
+                  <li>• User emails (Assigned To) must match existing team members</li>
+                  <li>• Status names must match existing system statuses</li>
+                  <li>• Date format: YYYY-MM-DD HH:MM:SS (e.g., 2024-12-25 10:00:00)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="bg-gray-50/80 backdrop-blur-sm px-8 py-6 flex justify-between items-center">
+          <div>
+            <%= link_to company_sample_lead_import_path(format: :csv), 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-2xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+              <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Download Sample
+            <% end %>
+          </div>
+          
+          <div class="flex space-x-4">
+            <%= link_to "Cancel", company_leads_path, 
+                  class: "inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-2xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" %>
+            <%= form.submit "Import Leads", 
+                  class: "inline-flex items-center px-8 py-3 border border-transparent text-base font-semibold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+

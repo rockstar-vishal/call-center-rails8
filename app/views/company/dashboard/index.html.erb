@@ -1,0 +1,173 @@
+<% content_for :page_title, "Company Dashboard" %>
+
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Leads</dt>
+            <dd class="text-lg font-medium text-gray-900">
+              <%= @leads_count %>
+              <% if current_company.lead_limit.present? %>
+                <span class="text-sm text-gray-500">/ <%= current_company.lead_limit %></span>
+              <% end %>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      
+      <!-- Lead Limit Progress Bar -->
+      <% if current_company.lead_limit.present? %>
+        <div class="mt-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">Lead Usage</span>
+            <span class="<%= current_company.lead_limit_reached? ? 'text-red-600' : 'text-gray-900' %> font-medium">
+              <%= current_company.lead_limit_percentage %>%
+            </span>
+          </div>
+          <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+            <div class="<%= current_company.lead_limit_percentage >= 90 ? 'bg-red-500' : current_company.lead_limit_percentage >= 75 ? 'bg-yellow-500' : 'bg-blue-500' %> h-2 rounded-full transition-all duration-300" 
+                 style="width: <%= [current_company.lead_limit_percentage, 100].min %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="bg-gray-50 px-5 py-3">
+      <% if current_company.lead_limit_reached? %>
+        <span class="text-sm text-red-600 font-medium">Lead limit reached</span>
+      <% else %>
+        <%= link_to "View all leads", company_leads_path, class: "text-sm text-blue-600 hover:text-blue-500" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Active Projects</dt>
+            <dd class="text-lg font-medium text-gray-900"><%= @projects_count %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 px-5 py-3">
+      <%= link_to "View all projects", company_projects_path, class: "text-sm text-blue-600 hover:text-blue-500" %>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Team Members</dt>
+            <dd class="text-lg font-medium text-gray-900"><%= @users_count %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 px-5 py-3">
+      <% if current_user.admin? || current_user.manager? %>
+        <%= link_to "View all users", company_users_path, class: "text-sm text-blue-600 hover:text-blue-500" %>
+      <% else %>
+        <span class="text-sm text-gray-500">Team members</span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Recent Leads -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Recent Leads</h3>
+    </div>
+    <div class="px-6 py-4">
+      <% if @recent_leads.any? %>
+        <div class="space-y-3">
+          <% @recent_leads.each do |lead| %>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= lead.name %></p>
+                <p class="text-sm text-gray-500">
+                  <%= lead.project.name %> • <%= lead.status.name %>
+                </p>
+              </div>
+              <div class="text-sm text-gray-500">
+                <%= time_ago_in_words(lead.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <%= link_to "View all leads", company_leads_path, class: "text-sm text-blue-600 hover:text-blue-500" %>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-500">No leads created yet.</p>
+        <div class="mt-4">
+          <%= link_to "Create your first lead", new_company_lead_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent Projects -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Recent Projects</h3>
+    </div>
+    <div class="px-6 py-4">
+      <% if @recent_projects.any? %>
+        <div class="space-y-3">
+          <% @recent_projects.each do |project| %>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= project.name %></p>
+                <p class="text-sm text-gray-500">
+                  <%= pluralize(project.leads.count, 'lead') %>
+                </p>
+              </div>
+              <div class="text-sm text-gray-500">
+                <%= time_ago_in_words(project.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <%= link_to "View all projects", company_projects_path, class: "text-sm text-blue-600 hover:text-blue-500" %>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-500">No projects created yet.</p>
+        <div class="mt-4">
+          <%= link_to "Create your first project", new_company_project_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

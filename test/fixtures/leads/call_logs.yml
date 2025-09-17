@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  lead: one
+  user: one
+  status: one
+  ncd: 2025-09-17 14:05:49
+  comment: MyText
+
+two:
+  lead: two
+  user: two
+  status: two
+  ncd: 2025-09-17 14:05:49
+  comment: MyText
