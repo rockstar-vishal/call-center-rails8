@@ -10,7 +10,7 @@ class Company::LeadsController < Company::BaseController
       @leads = @leads.smart_search(search_params)
     end
     
-    @leads = @leads.order(created_at: :desc)
+    @leads = @leads.order(created_at: :desc).page(params[:page]).per(25)
     @search_active = search_params.any?
   end
 

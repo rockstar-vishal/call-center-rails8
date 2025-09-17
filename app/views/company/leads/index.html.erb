@@ -170,6 +170,135 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Pagination -->
+      <% if @leads.respond_to?(:total_pages) && @leads.total_pages > 1 %>
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <!-- Mobile pagination -->
+            <% if @leads.prev_page %>
+              <%= link_to company_leads_path(params.permit!.merge(page: @leads.prev_page)), 
+                    class: "relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+                Previous
+              <% end %>
+            <% else %>
+              <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-300 bg-gray-50 cursor-not-allowed">
+                Previous
+              </span>
+            <% end %>
+            
+            <% if @leads.next_page %>
+              <%= link_to company_leads_path(params.permit!.merge(page: @leads.next_page)), 
+                    class: "ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+                Next
+              <% end %>
+            <% else %>
+              <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-300 bg-gray-50 cursor-not-allowed">
+                Next
+              </span>
+            <% end %>
+          </div>
+          
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium"><%= @leads.offset_value + 1 %></span>
+                to
+                <span class="font-medium"><%= [@leads.offset_value + @leads.limit_value, @leads.total_count].min %></span>
+                of
+                <span class="font-medium"><%= @leads.total_count %></span>
+                results
+              </p>
+            </div>
+            <div>
+              <!-- Desktop pagination -->
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <% if @leads.prev_page %>
+                  <%= link_to company_leads_path(params.permit!.merge(page: @leads.prev_page)), 
+                        class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" do %>
+                    <span class="sr-only">Previous</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                <% else %>
+                  <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed">
+                    <span class="sr-only">Previous</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                <% end %>
+                
+                <!-- Page numbers -->
+                <% page_range = if @leads.total_pages <= 7
+                     (1..@leads.total_pages)
+                   else
+                     start_page = [@leads.current_page - 2, 1].max
+                     end_page = [start_page + 4, @leads.total_pages].min
+                     start_page = [end_page - 4, 1].max
+                     (start_page..end_page)
+                   end %>
+                
+                <% if page_range.first > 1 %>
+                  <%= link_to company_leads_path(params.permit!.merge(page: 1)), 
+                        class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" do %>
+                    1
+                  <% end %>
+                  <% if page_range.first > 2 %>
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                      ...
+                    </span>
+                  <% end %>
+                <% end %>
+                
+                <% page_range.each do |page| %>
+                  <% if page == @leads.current_page %>
+                    <span class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                      <%= page %>
+                    </span>
+                  <% else %>
+                    <%= link_to company_leads_path(params.permit!.merge(page: page)), 
+                          class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" do %>
+                      <%= page %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+                
+                <% if page_range.last < @leads.total_pages %>
+                  <% if page_range.last < @leads.total_pages - 1 %>
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                      ...
+                    </span>
+                  <% end %>
+                  <%= link_to company_leads_path(params.permit!.merge(page: @leads.total_pages)), 
+                        class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" do %>
+                    <%= @leads.total_pages %>
+                  <% end %>
+                <% end %>
+                
+                <% if @leads.next_page %>
+                  <%= link_to company_leads_path(params.permit!.merge(page: @leads.next_page)), 
+                        class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" do %>
+                    <span class="sr-only">Next</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                <% else %>
+                  <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed">
+                    <span class="sr-only">Next</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                <% end %>
+              </nav>
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
