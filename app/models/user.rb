@@ -20,6 +20,12 @@ class User < ApplicationRecord
     role.tag == 'sysad'
   end
 
+  def manageables
+    users = self.company.users
+    return users if self.admin?
+    return users.where(id: self.subordinates.ids | [self.id])
+  end
+
   def company_level_user?
     %w[admin manager executive].include?(role.tag)
   end

@@ -1,0 +1,136 @@
+<%# 
+  REUSABLE MODAL SYSTEM - USAGE EXAMPLES
+  =====================================
+  
+  This file contains examples of how to use the reusable modal system.
+  DO NOT include this file in production views - it's for reference only.
+%>
+
+<%# 1. BASIC CENTER MODAL %>
+<%= modal 'basic-modal', title: 'Basic Modal' do %>
+  <p>This is a basic centered modal with default settings.</p>
+<% end %>
+
+<%# 2. RIGHT DRAWER (like lead details) %>
+<%= modal 'lead-drawer', 
+          type: 'drawer-right', 
+          size: 'lg', 
+          title: 'Lead Details' do %>
+  <p>This is a right-side drawer modal, perfect for detail views.</p>
+<% end %>
+
+<%# 3. LEFT DRAWER %>
+<%= modal 'navigation-drawer', 
+          type: 'drawer-left', 
+          size: 'md', 
+          title: 'Navigation' do %>
+  <p>This is a left-side drawer, good for navigation menus.</p>
+<% end %>
+
+<%# 4. FULL-SCREEN MODAL %>
+<%= modal 'fullscreen-modal', 
+          size: 'full', 
+          title: 'Full Screen View' do %>
+  <p>This modal takes up the full screen.</p>
+<% end %>
+
+<%# 5. SMALL CONFIRMATION MODAL %>
+<%= modal 'confirm-modal', 
+          size: 'sm', 
+          title: 'Confirm Action' do %>
+  <p>Are you sure you want to delete this item?</p>
+  <div class="mt-4 flex space-x-3">
+    <button data-action="click->modal#close" class="btn btn-secondary">Cancel</button>
+    <button class="btn btn-danger">Delete</button>
+  </div>
+<% end %>
+
+<%# 6. PERSISTENT MODAL (can't be closed by clicking outside) %>
+<%= modal 'loading-modal', 
+          persistent: true, 
+          closable: false,
+          title: 'Processing...' do %>
+  <div class="text-center py-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="mt-4">Please wait while we process your request...</p>
+  </div>
+<% end %>
+
+<%# 7. MODAL WITHOUT HEADER %>
+<%= modal 'no-header-modal', 
+          title: nil, 
+          show_close_button: false do %>
+  <div class="text-center">
+    <h3 class="text-lg font-semibold mb-4">Custom Header</h3>
+    <p>This modal has no default header, so you can create your own.</p>
+    <button data-action="click->modal#close" class="mt-4 btn btn-primary">Close</button>
+  </div>
+<% end %>
+
+<%# 8. OPENING MODALS WITH JAVASCRIPT %>
+<script>
+  // Open a modal programmatically
+  function openModal(modalId) {
+    const modal = document.querySelector(`#${modalId}`)
+    const controller = application.getControllerForElementAndIdentifier(modal, 'modal')
+    controller.open()
+  }
+
+  // Load content into a modal via AJAX
+  async function loadModalContent(modalId, url, title) {
+    const modal = document.querySelector(`#${modalId}`)
+    const controller = application.getControllerForElementAndIdentifier(modal, 'modal')
+    
+    await controller.loadContent(url, {
+      title: title,
+      loadingMessage: "Loading content...",
+      errorMessage: "Failed to load. Please try again."
+    })
+  }
+</script>
+
+<%# 9. TRIGGERING MODALS FROM BUTTONS %>
+<button data-action="click->modal#open" 
+        data-modal-target="#basic-modal">
+  Open Basic Modal
+</button>
+
+<button data-action="click->modal#loadContentClick"
+        data-url="/some/ajax/endpoint"
+        data-title="Dynamic Content"
+        data-loading-message="Loading..."
+        data-error-message="Failed to load content">
+  Load Content Modal
+</button>
+
+<%# 10. CUSTOM STYLING %>
+<%= modal 'custom-styled-modal',
+          classes: 'custom-modal-wrapper',
+          backdrop_classes: 'bg-red-500 bg-opacity-25' do %>
+  <p>This modal has custom CSS classes applied.</p>
+<% end %>
+
+<%# 
+  STIMULUS CONTROLLER METHODS:
+  ===========================
+  
+  - open()                    : Opens the modal
+  - close()                   : Closes the modal (respects persistent setting)
+  - forceClose()             : Force closes modal (ignores persistent setting)
+  - loadContent(url, options): Loads content via AJAX
+  - setContent(html)         : Sets modal content directly
+  - setTitle(title)          : Sets modal title
+  - showLoading(message)     : Shows loading state
+  - showError(message)       : Shows error state
+  
+  DATA ATTRIBUTES FOR TRIGGERS:
+  =============================
+  
+  - data-action="click->modal#open"              : Opens modal on click
+  - data-action="click->modal#close"             : Closes modal on click
+  - data-action="click->modal#loadContentClick"  : Loads content on click
+  - data-url="/path/to/content"                  : URL for AJAX loading
+  - data-title="Modal Title"                     : Title for loaded content
+  - data-loading-message="Loading..."            : Custom loading message
+  - data-error-message="Error occurred"          : Custom error message
+%>

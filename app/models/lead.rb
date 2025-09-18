@@ -8,6 +8,13 @@ class Lead < ApplicationRecord
   validates :phone, presence: true
   validate :company_lead_limit_not_exceeded, on: :create
 
+  before_validation :set_defaults, on: :create
+
+  def set_defaults
+    self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
+    self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
+  end
+
   # Role-based filtering scope
   scope :accessible_by, ->(user) {
     case user.role.tag

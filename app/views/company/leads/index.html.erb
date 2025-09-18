@@ -83,7 +83,66 @@
 <% end %>
 
 <div class="mt-8 flex flex-col">
-  <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+  <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8" 
+       data-controller="bulk-selector" 
+       data-bulk-selector-is-admin-value="<%= current_user.admin? %>">
+
+    <!-- Bulk Update Form (Admin Only) -->
+    <% if current_user.admin? %>
+      <div data-bulk-selector-target="bulkForm" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 mx-4 sm:mx-6 lg:mx-8">
+        <%= form_with url: bulk_update_company_leads_path, method: :patch, local: true, class: "flex items-center justify-between" do |form| %>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm font-medium text-blue-900">
+                <span data-bulk-selector-target="selectedCount">0</span> lead(s) selected
+              </span>
+            </div>
+            
+            <button type="button" 
+                    data-bulk-selector-target="selectAllButton"
+                    data-action="click->bulk-selector#selectAll"
+                    class="hidden text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Select All on Page
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <!-- Status Update -->
+            <div class="flex items-center space-x-2">
+              <%= form.label :status_id, "Status:", class: "text-sm font-medium text-gray-700" %>
+              <%= form.select :status_id, 
+                    options_from_collection_for_select(Status.order(:name), :id, :name),
+                    { prompt: "Change status..." },
+                    { class: "py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" } %>
+            </div>
+
+            <!-- Assign To Update -->
+            <div class="flex items-center space-x-2">
+              <%= form.label :user_id, "Assign to:", class: "text-sm font-medium text-gray-700" %>
+              <%= form.select :user_id, 
+                    options_from_collection_for_select(current_company.users.joins(:role).where(role: { tag: ['admin', 'manager', 'executive'] }).order(:name), :id, ->(user) { user.name || user.email }),
+                    { prompt: "Assign to..." },
+                    { class: "py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" } %>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-2">
+              <%= form.submit "Update Selected", 
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200" %>
+              
+              <button type="button" 
+                      data-action="click->bulk-selector#clearSelection"
+                      class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                Clear
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
     <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
       <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <table class="min-w-full divide-y divide-gray-300">
@@ -104,14 +163,37 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10">
-                        <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                          <span class="text-white text-sm font-medium">
-                            <%= lead.name&.first&.upcase || 'L' %>
-                          </span>
-                        </div>
+                        <% if current_user.admin? %>
+                          <div data-bulk-selector-target="leadCheckbox"
+                               data-lead-id="<%= lead.id %>"
+                               data-action="click->bulk-selector#toggleLead"
+                               class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all duration-200 relative">
+                            <!-- Initials (shown when not selected) -->
+                            <span class="lead-initials text-white text-sm font-medium transition-opacity duration-200">
+                              <%= lead.name&.first&.upcase || 'L' %>
+                            </span>
+                            <!-- Checkmark (shown when selected) -->
+                            <svg class="lead-checkmark h-6 w-6 text-white opacity-0 absolute transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <input type="checkbox" class="absolute inset-0 opacity-0 cursor-pointer">
+                          </div>
+                        <% else %>
+                          <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                            <span class="text-white text-sm font-medium">
+                              <%= lead.name&.first&.upcase || 'L' %>
+                            </span>
+                          </div>
+                        <% end %>
                       </div>
                       <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900"><%= lead.name %></div>
+                        <div class="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200" 
+                             data-controller="lead-opener"
+                             data-action="click->lead-opener#openLead"
+                             data-lead-opener-url-value="<%= company_lead_path(lead) %>"
+                             data-lead-opener-name-value="<%= lead.name %>">
+                          <%= lead.name %>
+                        </div>
                         <div class="text-sm text-gray-500">
                           <%= lead.email %> • <%= lead.phone %>
                         </div>
@@ -143,11 +225,19 @@
                     <%= lead.ncd ? lead.ncd.strftime("%b %d, %Y") : '-' %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <%= link_to "View", company_lead_path(lead), class: "text-blue-600 hover:text-blue-900 mr-4" %>
-                    <%= link_to "Edit", edit_company_lead_path(lead), class: "text-blue-600 hover:text-blue-900 mr-4" %>
-                    <%= link_to "Delete", company_lead_path(lead), 
+                    <button data-controller="lead-opener"
+                            data-action="click->lead-opener#openMiniEdit"
+                            data-lead-opener-url-value="<%= mini_edit_company_lead_path(lead) %>"
+                            data-lead-opener-name-value="<%= lead.name %>"
+                            class="text-blue-600 hover:text-blue-900 mr-4 bg-transparent border-none cursor-pointer">
+                      Edit
+                    </button>
+                    <% if current_user.admin? %>
+                      <%= link_to "Delete", company_lead_path(lead), 
                           data: { "turbo-method": :delete, "turbo-confirm": "Are you sure?" }, 
                           class: "text-red-600 hover:text-red-900" %>
+
+                    <% end %>
                   </td>
                 </tr>
               <% end %>
@@ -564,6 +654,49 @@
           </svg>
           Apply Filters
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lead Details Drawer Modal -->
+<%= modal 'lead-details-modal', 
+          type: 'drawer-right', 
+          size: 'lg', 
+          title: 'Lead Details',
+          show_close_button: true do %>
+  <!-- Content will be loaded here -->
+<% end %>
+
+<!-- Mini Edit Modal -->
+<div id="mini-edit-modal" data-controller="modal" 
+     data-modal-type-value="center" 
+     data-modal-size-value="xxl"
+     data-modal-closable-value="true"
+     data-modal-persistent-value="false"
+     class="modal-wrapper">
+  
+  <!-- Overlay -->
+  <div data-modal-target="overlay" 
+       data-action="click->modal#overlayClick"
+       class="hidden fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-40">
+  </div>
+
+  <!-- Modal Container -->
+  <div data-modal-target="container"
+       class="hidden fixed inset-0 flex items-center justify-center p-8 z-50">
+    
+    <!-- Modal Card -->
+    <div class="bg-white shadow-2xl rounded-2xl w-3/4 max-w-6xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50/80 backdrop-blur-sm rounded-t-2xl">
+        <h2 data-modal-target="title" class="text-xl font-semibold text-gray-900">Quick Edit Lead</h2>
+      </div>
+      
+      <!-- Content -->
+      <div data-modal-target="content" class="flex-1 overflow-y-auto p-6">
+        <!-- Content will be loaded here -->
       </div>
     </div>
   </div>

@@ -28,6 +28,13 @@ Rails.application.routes.draw do
   namespace :company do
     get 'dashboard', to: 'dashboard#index'
     resources :leads do
+      collection do
+        patch :bulk_update
+      end
+      member do
+        get :mini_edit
+        patch :mini_update
+      end
       resources :call_logs, controller: 'leads/call_logs'
     end
     
