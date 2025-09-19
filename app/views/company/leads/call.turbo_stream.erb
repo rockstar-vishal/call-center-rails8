@@ -1,0 +1,73 @@
+<% if @call_log.persisted? %>
+  <%= turbo_stream.update "call-log-modal" do %>
+    <!-- Modal is already defined in the page, we just need to show it and populate content -->
+    <div id="call-log-modal" data-controller="modal" 
+         data-modal-type-value="center" 
+         data-modal-size-value="xxl"
+         data-modal-closable-value="true"
+         data-modal-persistent-value="false"
+         class="modal-wrapper">
+      
+      <!-- Overlay -->
+      <div data-modal-target="overlay" 
+           data-action="click->modal#overlayClick"
+           class="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-40 opacity-100">
+      </div>
+
+      <!-- Modal Container -->
+      <div data-modal-target="container"
+           class="fixed inset-0 flex items-center justify-center p-8 z-50">
+        
+        <!-- Modal Card -->
+        <div class="bg-white shadow-2xl rounded-2xl w-3/4 max-w-6xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-green-50/80 backdrop-blur-sm rounded-t-2xl">
+            <div class="flex items-center">
+              <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center mr-3">
+                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 data-modal-target="title" class="text-xl font-semibold text-gray-900">Call <%= @lead.name %></h2>
+                <p class="text-sm text-gray-600">Record call details and update lead status</p>
+              </div>
+            </div>
+            <button data-action="click->modal#close" class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Content -->
+          <div data-modal-target="content" class="flex-1 overflow-y-auto p-6">
+            <%= render 'call_form' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <%= turbo_stream.update "body" do %>
+    <script>document.body.classList.add('overflow-hidden');</script>
+  <% end %>
+<% else %>
+  <%= turbo_stream.prepend "body" do %>
+    <div class="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg" id="error-alert">
+      <div class="flex items-center">
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <span><%= @error_message %></span>
+        <button class="ml-4 text-red-700 hover:text-red-900" onclick="this.parentElement.parentElement.remove()">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <script>setTimeout(() => document.getElementById('error-alert')?.remove(), 5000);</script>
+    </div>
+  <% end %>
+<% end %>

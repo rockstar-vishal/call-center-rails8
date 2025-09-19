@@ -1,0 +1,138 @@
+<!-- Call Log Form for Lead -->
+<%= form_with model: @call_log, 
+              url: submit_call_company_lead_path(@lead, call_log_id: @call_log.id),
+              method: :patch,
+              class: "space-y-6" do |form| %>
+
+  <!-- Error Messages -->
+  <% if @call_log_error || (@call_log && @call_log.errors.any?) %>
+    <div class="rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <% if @call_log_error %>
+            <h3 class="text-sm font-semibold text-red-800">Call Log Error</h3>
+            <p class="mt-2 text-sm text-red-700"><%= @call_log_error %></p>
+          <% else %>
+            <h3 class="text-sm font-semibold text-red-800">
+              Please fix the following <%= pluralize(@call_log.errors.count, "error") %>:
+            </h3>
+            <ul class="mt-2 text-sm text-red-700 space-y-1">
+              <% @call_log.errors.full_messages.each do |message| %>
+                <li class="flex items-center">
+                  <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-2"></span>
+                  <%= message %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @call_log_error %>
+    <!-- Lead Information (Read-only) -->
+    <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+      <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+        <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        Lead Information
+      </h3>
+      
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="font-medium text-gray-600">Name:</span>
+          <p class="text-gray-900"><%= @lead.name %></p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-600">Phone:</span>
+          <p class="text-gray-900"><%= @lead.phone %></p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-600">Email:</span>
+          <p class="text-gray-900"><%= @lead.email %></p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-600">Project:</span>
+          <p class="text-gray-900"><%= @lead.project.name %></p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-600">Current Status:</span>
+          <p class="text-gray-900"><%= @lead.status.name %></p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-600">Calling as:</span>
+          <p class="text-gray-900"><%= current_user.name || current_user.email %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @call_log_error %>
+    <!-- Call Log Fields -->
+    <div class="space-y-6">
+    <!-- Status and Next Call Date (Same Line) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Status -->
+      <div>
+        <%= form.label :status_id, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+          <span class="flex items-center">
+            <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            New Status
+          </span>
+        <% end %>
+        <%= form.select :status_id, 
+              options_from_collection_for_select(@statuses, :id, :name, @call_log.status_id),
+              { prompt: "Select new status..." },
+              { class: "w-full py-3 px-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" } %>
+      </div>
+
+      <!-- Next Call Date -->
+      <div>
+        <%= form.label :ncd, "Follow-up Date", class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+          <span class="flex items-center">
+            <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Follow-up Date
+          </span>
+        <% end %>
+        <%= form.datetime_local_field :ncd, 
+              class: "w-full py-3 px-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" %>
+      </div>
+    </div>
+
+    <!-- Comment -->
+    <div>
+      <%= form.label :comment, "Call Notes", class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+        <span class="flex items-center">
+          <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8m10 0H7"></path>
+          </svg>
+          Call Notes & Comments
+        </span>
+      <% end %>
+      <%= form.text_area :comment, 
+            rows: 4,
+            class: "w-full py-3 px-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none",
+            placeholder: "Enter call notes, discussion points, next steps..." %>
+    </div>
+  </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4">
+      <%= form.submit "Log Call & Update Lead", 
+            class: "w-full inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-semibold rounded-2xl text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-lg hover:shadow-xl" %>
+    </div>
+  </div>
+  <% end %>
+
+<% end %>

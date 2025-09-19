@@ -86,7 +86,7 @@ export default class extends Controller {
       
       const response = await fetch(url, {
         headers: {
-          'Accept': 'text/html',
+          'Accept': 'text/html, application/json',
           'X-Requested-With': 'XMLHttpRequest',
           ...options.headers
         },
@@ -95,14 +95,32 @@ export default class extends Controller {
       })
       
       if (response.ok) {
-        const html = await response.text()
-        this.setContent(html)
-        if (options.title) this.setTitle(options.title)
-        this.open()
-        return { success: true, data: html }
+        const contentType = response.headers.get('content-type')
+        
+        if (contentType && contentType.includes('application/json')) {
+          // Handle JSON response (could be an error)
+          const jsonData = await response.json()
+          if (jsonData.success === false) {
+            return { success: false, error: 'JSON Error', data: jsonData }
+          }
+        } else {
+          // Handle HTML response (normal case)
+          const html = await response.text()
+          this.setContent(html)
+          if (options.title) this.setTitle(options.title)
+          this.open()
+          return { success: true, data: html }
+        }
       } else {
-        this.showError(options.errorMessage)
-        return { success: false, error: 'HTTP Error' }
+        // Check if the error response is JSON
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json()
+          return { success: false, error: 'HTTP Error', data: errorData }
+        } else {
+          this.showError(options.errorMessage)
+          return { success: false, error: 'HTTP Error' }
+        }
       }
     } catch (error) {
       console.error('Modal content loading error:', error)

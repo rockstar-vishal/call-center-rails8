@@ -34,6 +34,8 @@ Rails.application.routes.draw do
       member do
         get :mini_edit
         patch :mini_update
+        get :call
+        patch :submit_call
       end
       resources :call_logs, controller: 'leads/call_logs'
     end
@@ -44,6 +46,13 @@ Rails.application.routes.draw do
     get 'leads/import/sample', to: 'lead_imports#sample', as: 'sample_lead_import'
     
     resources :projects
+    namespace :reports do
+      get :projects
+      get :productivity
+      get :users
+      get :activity
+      get :performance
+    end
     resources :users do
       # Manager assignment routes
       get 'managers', to: 'user_managers#index'

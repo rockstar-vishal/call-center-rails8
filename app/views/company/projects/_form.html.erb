@@ -1,0 +1,132 @@
+<div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-xl w-full space-y-8">
+    <!-- Header Section -->
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg">
+        <% if @project.persisted? %>
+          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        <% else %>
+          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+        <% end %>
+      </div>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">
+        <%= @project.persisted? ? "Edit Project" : "Create New Project" %>
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        <%= @project.persisted? ? "Update project information and details" : "Set up a new project for your company" %>
+      </p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white/80 backdrop-blur-sm shadow-2xl rounded-3xl border border-gray-200/50">
+      <%= form_with(model: [:company, @project], local: true, class: "p-8 space-y-8") do |form| %>
+        <!-- Error Messages -->
+        <% if @project.errors.any? %>
+          <div class="rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200 p-6">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-base font-semibold text-red-800">
+                  Please fix the following <%= pluralize(@project.errors.count, "error") %>:
+                </h3>
+                <ul class="mt-3 text-sm text-red-700 space-y-2">
+                  <% @project.errors.full_messages.each do |message| %>
+                    <li class="flex items-center">
+                      <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-3"></span>
+                      <%= message %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Form Fields -->
+        <div class="space-y-8">
+          <!-- Project Name -->
+          <div>
+            <%= form.label :name, class: "block text-base font-semibold text-gray-700 mb-3" do %>
+              <span class="flex items-center">
+                <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                Project Name
+              </span>
+            <% end %>
+            <%= form.text_field :name, 
+                  class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                  placeholder: "Enter project name..." %>
+          </div>
+
+          <!-- Project Stats (Only for existing projects) -->
+          <% if @project.persisted? %>
+            <div class="bg-gray-50 rounded-2xl p-6 space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Project Statistics
+              </h3>
+              
+              <div class="grid grid-cols-2 gap-6">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-600"><%= @project.leads.count %></div>
+                  <div class="text-sm text-gray-600">Total Leads</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-600"><%= @project.created_at.strftime("%b %Y") %></div>
+                  <div class="text-sm text-gray-600">Created</div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Company Info (Read-only) -->
+          <div class="bg-blue-50 rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              Company Information
+            </h3>
+            
+            <div class="text-sm text-gray-700">
+              <p><span class="font-medium">Company:</span> <%= current_company.name %></p>
+              <p class="mt-1"><span class="font-medium">Domain:</span> <%= current_company.domain %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="bg-gray-50/80 backdrop-blur-sm px-8 py-6 -mx-8 -mb-8 rounded-b-3xl flex justify-between items-center">
+          <%= link_to @project.persisted? ? company_project_path(@project) : company_projects_path, 
+                class: "inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-2xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Cancel
+          <% end %>
+          
+          <%= form.submit @project.persisted? ? "Update Project" : "Create Project", 
+                class: "inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-2xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Help Text -->
+    <div class="text-center">
+      <p class="text-sm text-gray-500">
+        <%= @project.persisted? ? "Need help? Contact your system administrator for assistance." : "Projects help organize and categorize your leads effectively." %>
+      </p>
+    </div>
+  </div>
+</div>

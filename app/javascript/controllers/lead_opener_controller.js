@@ -20,6 +20,8 @@ export default class extends Controller {
     })
   }
 
+  // Note: openCall method removed - now handled by Rails remote: true links
+
   async openModal(modalSelector, options) {
     try {
       // Find the modal element

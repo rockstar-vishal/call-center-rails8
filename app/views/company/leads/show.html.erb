@@ -82,6 +82,12 @@
         <dt class="text-sm font-medium text-gray-500">Created</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
       </div>
+      <% if @lead.user_assinged_on.present? %>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Last User Assigned On</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.user_assinged_on&.strftime("%B %d, %Y at %I:%M %p") %></dd>
+      </div>
+      <%end%>
     </dl>
   </div>
 </div>
@@ -118,7 +124,7 @@
                       <p class="text-sm text-gray-500 mt-1">
                         Status updated to: 
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
-                          <%= case call_log.status.tag
+                          <%= case call_log.status&.tag
                               when 'new' then 'bg-gray-100 text-gray-800'
                               when 'contacted' then 'bg-blue-100 text-blue-800'
                               when 'interested' then 'bg-green-100 text-green-800'
@@ -128,7 +134,7 @@
                               when 'lost' then 'bg-red-100 text-red-800'
                               else 'bg-gray-100 text-gray-800'
                               end %>">
-                          <%= call_log.status.name %>
+                          <%= call_log.status&.name %>
                         </span>
                       </p>
                       <% if call_log.comment.present? %>

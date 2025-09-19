@@ -1,6 +1,7 @@
 class Company::LeadsController < Company::BaseController
   before_action :set_leads
-  before_action :set_lead, only: [:show, :edit, :update, :destroy, :mini_edit, :mini_update]
+  before_action :set_lead, only: [:show, :edit, :update, :destroy, :call, :submit_call]
+  before_action :set_call_log, only: [:submit_call]
   PER_PAGE = 50
 
   def index
@@ -51,11 +52,55 @@ class Company::LeadsController < Company::BaseController
     @users = current_company.users.order(:name)
   end
 
-  def mini_edit
-    @statuses = Status.order(:name)
+  def call
+    @call_log = @lead.call_logs.build(user_id: current_user.id)
     
     respond_to do |format|
-      format.html { render layout: false if request.xhr? }
+      if @call_log.save
+        @statuses = Status.order(:name)
+        format.html { render :call }
+        format.turbo_stream # Will render call.turbo_stream.erb
+      else
+        @error_message = "Failed to Initiate Call: #{@call_log.errors.full_messages.join(', ')}"
+        format.html { 
+          flash[:alert] = @error_message
+          redirect_to request.referer || company_leads_path 
+        }
+        format.turbo_stream # Will render call.turbo_stream.erb with errors
+      end
+    end
+  end
+
+  def submit_call
+    if @call_log_error
+      # Handle invalid call log error
+      respond_to do |format|
+        format.html { render :call, layout: false, status: :unprocessable_entity }
+        format.turbo_stream { render :call }
+        format.json { render json: { success: false, errors: [@call_log_error] } }
+      end
+    elsif @call_log&.update(call_log_params)
+      # Also update the lead's status and NCD if provided
+      lead_updates = {}
+      lead_updates[:status_id] = @call_log.status_id if @call_log.status_id.present?
+      lead_updates[:ncd] = @call_log.ncd if @call_log.ncd.present?
+      
+      @lead.update(lead_updates) if lead_updates.any?
+      
+      @redirect_url = request.referer || company_leads_path
+      
+      respond_to do |format|
+        format.html { redirect_to @redirect_url, notice: 'Call logged successfully.' }
+        format.turbo_stream # Will render submit_call.turbo_stream.erb
+        format.json { render json: { success: true, message: 'Call logged successfully' } }
+      end
+    else
+      @statuses = Status.order(:name)
+      respond_to do |format|
+        format.html { render :call, layout: false, status: :unprocessable_entity }
+        format.turbo_stream { render :call }
+        format.json { render json: { success: false, errors: @call_log&.errors&.full_messages || ['Invalid call log'] } }
+      end
     end
   end
 
@@ -71,21 +116,6 @@ class Company::LeadsController < Company::BaseController
     end
   end
 
-  def mini_update
-    if @lead.update(mini_lead_params)
-      respond_to do |format|
-        format.html { redirect_to company_leads_path, notice: 'Lead was successfully updated.' }
-        format.json { render json: { success: true, message: 'Lead updated successfully' } }
-      end
-    else
-      @statuses = Status.order(:name)
-      respond_to do |format|
-        format.html { render :mini_edit, layout: false, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: @lead.errors.full_messages } }
-      end
-    end
-  end
-
   def destroy
     unless current_user.admin?
       flash[:alert] = "You are not authorized to delete leads. This incident has been reported!"
@@ -96,20 +126,20 @@ class Company::LeadsController < Company::BaseController
     else
       flash[:alert] = "Cannot delete this lead. #{@lead.errors.full_messages.join(', ')}"
     end
-    redirect_to company_leads_path
+    redirect_to request.referer || company_leads_path
   end
 
   def bulk_update
     unless current_user.admin?
       flash[:alert] = "Access denied. Only admins can perform bulk updates."
-      redirect_to company_leads_path and return
+      redirect_to request.referer || company_leads_path and return
     end
 
     lead_ids = params[:lead_ids]
     
     if lead_ids.blank?
       flash[:alert] = "No leads selected for bulk update."
-      redirect_to company_leads_path and return
+      redirect_to request.referer || company_leads_path and return
     end
 
     # Get accessible leads for the current user
@@ -117,7 +147,7 @@ class Company::LeadsController < Company::BaseController
     
     if accessible_leads.empty?
       flash[:alert] = "No valid leads found for bulk update."
-      redirect_to company_leads_path and return
+      redirect_to request.referer || company_leads_path and return
     end
 
     update_params = bulk_update_params
@@ -148,7 +178,7 @@ class Company::LeadsController < Company::BaseController
       flash[:alert] = "No leads were updated. #{errors.first(5).join('; ')}"
     end
 
-    redirect_to company_leads_path
+    redirect_to request.referer || company_leads_path
   end
 
   private
@@ -161,12 +191,28 @@ class Company::LeadsController < Company::BaseController
     @leads = Lead.accessible_by(current_user)
   end
 
+  def set_call_log
+    # Get the call log ID from params
+    if params[:call_log_id]
+      begin
+        @call_log = @lead.call_logs.find(params[:call_log_id])
+      rescue ActiveRecord::RecordNotFound
+        @call_log = nil
+        @call_log_error = "Invalid call log entry. Please start a new call."
+      end
+    end
+  end
+
   def lead_params
     params.require(:lead).permit(:name, :email, :phone, :project_id, :status_id, :user_id, :comment, :ncd)
   end
 
   def mini_lead_params
-    params.require(:lead).permit(:status_id, :ncd, :comment)
+    params.require(:call_log).permit(:status_id, :ncd, :comment)
+  end
+
+  def call_log_params
+    params.require(:leads_call_log).permit(:status_id, :ncd, :comment)
   end
 
   def bulk_update_params

@@ -1,0 +1,5 @@
+class AddUserAssingedOnToLeads < ActiveRecord::Migration[8.0]
+  def change
+    add_column :leads, :user_assinged_on, :datetime
+  end
+end

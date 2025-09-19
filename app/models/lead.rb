@@ -10,9 +10,18 @@ class Lead < ApplicationRecord
 
   before_validation :set_defaults, on: :create
 
+  before_update :set_user_assinged_on
+
   def set_defaults
     self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
+    self.user_assinged_on = Time.zone.now
+  end
+
+  def set_user_assinged_on
+    if changes.keys.include?("user_id")
+      self.user_assinged_on = Time.zone.now
+    end
   end
 
   # Role-based filtering scope

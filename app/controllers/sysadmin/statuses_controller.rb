@@ -29,7 +29,7 @@ class Sysadmin::StatusesController < Sysadmin::BaseController
   def update
     if @status.update(status_params)
       flash[:notice] = 'Status was successfully updated.'
-      redirect_to sysadmin_status_path(@status)
+      redirect_to sysadmin_statuses_path
     else
       render :edit, status: :unprocessable_entity
     end
