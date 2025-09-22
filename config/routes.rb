@@ -32,8 +32,6 @@ Rails.application.routes.draw do
         patch :bulk_update
       end
       member do
-        get :mini_edit
-        patch :mini_update
         get :call
         patch :submit_call
       end
@@ -46,6 +44,7 @@ Rails.application.routes.draw do
     get 'leads/import/sample', to: 'lead_imports#sample', as: 'sample_lead_import'
     
     resources :projects
+    resources :incomplete_calls, only: [:index, :show, :edit, :update, :destroy]
     namespace :reports do
       get :projects
       get :productivity

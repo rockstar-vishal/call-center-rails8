@@ -50,6 +50,17 @@ class Lead < ApplicationRecord
       accessible_by(user)
     end
 
+    def quick_search(query)
+      return all if query.blank?
+      
+      # Search across name, phone, and email fields
+      sanitized_query = sanitize_sql_like(query.strip)
+      where(
+        "leads.name ILIKE ? OR leads.phone ILIKE ? OR leads.email ILIKE ?",
+        "%#{sanitized_query}%", "%#{sanitized_query}%", "%#{sanitized_query}%"
+      )
+    end
+
     def smart_search(search_params)
       return all if search_params.blank?
       

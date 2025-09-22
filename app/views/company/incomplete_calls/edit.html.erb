@@ -1,0 +1,108 @@
+<% content_for :page_title, "Complete Call" %>
+
+<div class="max-w-4xl mx-auto">
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Complete Call</h1>
+        <p class="mt-2 text-sm text-gray-600">Fill in the missing details to complete this call log</p>
+      </div>
+      <%= link_to "← Back to Incomplete Calls", company_incomplete_calls_path, 
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" %>
+    </div>
+  </div>
+
+  <!-- Lead Information Card -->
+  <div class="bg-white shadow rounded-lg mb-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Lead Information</h3>
+    </div>
+    <div class="px-6 py-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @call_log.lead.name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Phone</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @call_log.lead.phone %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Email</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @call_log.lead.email || '-' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Project</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @call_log.lead.project.name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Current Status</dt>
+          <dd class="mt-1">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+              <%= case @call_log.lead.status.tag
+                  when 'new' then 'bg-gray-100 text-gray-800'
+                  when 'contacted' then 'bg-blue-100 text-blue-800'
+                  when 'interested' then 'bg-green-100 text-green-800'
+                  when 'not_interested' then 'bg-red-100 text-red-800'
+                  when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+                  else 'bg-gray-100 text-gray-800'
+                  end %>">
+              <%= @call_log.lead.status.name %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Call Started</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @call_log.created_at.strftime("%b %d, %Y at %I:%M %p") %></dd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call Log Form -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Call Details</h3>
+    </div>
+    <div class="px-6 py-6">
+      <%= form_with model: [@call_log], url: company_incomplete_call_path(@call_log), local: true, class: "space-y-6" do |form| %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Status -->
+          <div>
+            <%= form.label :status_id, "Call Outcome Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :status_id, 
+                  options_from_collection_for_select(@statuses, :id, :name, @call_log.status_id),
+                  { prompt: "Select status..." },
+                  { class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+
+          <!-- Next Call Date -->
+          <div>
+            <%= form.label :ncd, "Next Action Date", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.datetime_local_field :ncd, 
+                  value: @call_log.ncd&.strftime("%Y-%m-%dT%H:%M"),
+                  class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500", required: true %>
+          </div>
+        </div>
+
+        <!-- Comment -->
+        <div>
+          <%= form.label :comment, "Call Notes & Comments", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :comment, 
+                rows: 4,
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                placeholder: "Enter details about the call, customer response, next steps, etc.", required: true %>
+          <p class="mt-1 text-xs text-gray-500">This field is required to complete the call log.</p>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+          <%= link_to "Cancel", company_incomplete_calls_path, 
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= form.submit "Complete Call Log", 
+                class: "inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

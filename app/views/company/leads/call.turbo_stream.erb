@@ -1,4 +1,4 @@
-<% if @call_log.persisted? %>
+<% if @call_log&.persisted? %>
   <%= turbo_stream.update "call-log-modal" do %>
     <!-- Modal is already defined in the page, we just need to show it and populate content -->
     <div id="call-log-modal" data-controller="modal" 
@@ -34,11 +34,6 @@
                 <p class="text-sm text-gray-600">Record call details and update lead status</p>
               </div>
             </div>
-            <button data-action="click->modal#close" class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
           </div>
           
           <!-- Content -->
@@ -54,13 +49,13 @@
     <script>document.body.classList.add('overflow-hidden');</script>
   <% end %>
 <% else %>
-  <%= turbo_stream.prepend "body" do %>
+  <%= turbo_stream.update "error-alerts" do %>
     <div class="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg" id="error-alert">
       <div class="flex items-center">
         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.770.833.192 2.5 1.732 2.5z"></path>
         </svg>
-        <span><%= @error_message %></span>
+        <span><%= @error_message.present? ? @error_message : "An error occurred while initiating the call." %></span>
         <button class="ml-4 text-red-700 hover:text-red-900" onclick="this.parentElement.parentElement.remove()">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

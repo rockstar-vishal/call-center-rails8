@@ -79,11 +79,19 @@
           <% end %>
 
           <%= link_to company_leads_path, 
-                class: "#{request.path.start_with?('/company/leads') ? 'bg-blue-800 border-r-2 border-blue-400' : ''} group flex items-center px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors duration-200" do %>
+                class: "#{request.path.start_with?('/company/leads') && !request.path.start_with?('/company/incomplete_calls') ? 'bg-blue-800 border-r-2 border-blue-400' : ''} group flex items-center px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors duration-200" do %>
             <svg class="flex-shrink-0 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
             </svg>
             <span data-collapsible-sidebar-target="navText" class="ml-3">Leads</span>
+          <% end %>
+
+          <%= link_to company_incomplete_calls_path, 
+                class: "#{request.path.start_with?('/company/incomplete_calls') ? 'bg-blue-800 border-r-2 border-blue-400' : ''} group flex items-center px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors duration-200" do %>
+            <svg class="flex-shrink-0 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span data-collapsible-sidebar-target="navText" class="ml-3">Incomplete Calls</span>
           <% end %>
 
           <%= link_to company_projects_path, 
@@ -94,7 +102,7 @@
             <span data-collapsible-sidebar-target="navText" class="ml-3">Projects</span>
           <% end %>
 
-          <% if current_user.admin? || current_user.manager? %>
+          <% if current_user.admin? %>
             <%= link_to company_users_path, 
                   class: "#{request.path.start_with?('/company/users') ? 'bg-blue-800 border-r-2 border-blue-400' : ''} group flex items-center px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors duration-200" do %>
               <svg class="flex-shrink-0 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,6 +168,9 @@
           </div>
         <% end %>
 
+        <!-- Error alerts container for TURBO_STREAM -->
+        <div id="error-alerts"></div>
+
         <!-- Page content -->
         <main class="flex-1 overflow-y-auto">
           <div class="p-6">
@@ -168,5 +179,6 @@
         </main>
       </div>
     </div>
+
   </body>
 </html>

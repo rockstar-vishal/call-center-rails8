@@ -3,11 +3,19 @@
 <div class="sm:flex sm:items-center">
   <div class="sm:flex-auto">
     <h1 class="text-xl font-semibold text-gray-900">Projects</h1>
-    <p class="mt-2 text-sm text-gray-700">Manage your company's projects and track their leads.</p>
+    <p class="mt-2 text-sm text-gray-700">
+      <% if current_user.admin? %>
+        Manage your company's projects and track their leads.
+      <% else %>
+        View your company's projects for reference and training purposes.
+      <% end %>
+    </p>
   </div>
-  <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-    <%= link_to "Add project", new_company_project_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto" %>
-  </div>
+  <% if current_user.admin? %>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "Add project", new_company_project_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto" %>
+    </div>
+  <% end %>
 </div>
 
 <div class="mt-8 flex flex-col">
@@ -49,10 +57,12 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <%= link_to "View", company_project_path(project), class: "text-blue-600 hover:text-blue-900 mr-4" %>
-                    <%= link_to "Edit", edit_company_project_path(project), class: "text-blue-600 hover:text-blue-900 mr-4" %>
-                    <%= link_to "Delete", company_project_path(project), 
-                          data: { "turbo-method": :delete, "turbo-confirm": "Are you sure?" }, 
-                          class: "text-red-600 hover:text-red-900" %>
+                    <% if current_user.admin? %>
+                      <%= link_to "Edit", edit_company_project_path(project), class: "text-blue-600 hover:text-blue-900 mr-4" %>
+                      <%= link_to "Delete", company_project_path(project), 
+                            data: { "turbo-method": :delete, "turbo-confirm": "Are you sure?" }, 
+                            class: "text-red-600 hover:text-red-900" %>
+                    <% end %>
                   </td>
                 </tr>
               <% end %>
@@ -64,10 +74,18 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
                     <h3 class="mt-2 text-sm font-medium text-gray-900">No projects</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by creating your first project.</p>
-                    <div class="mt-6">
-                      <%= link_to "Add project", new_company_project_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
-                    </div>
+                    <p class="mt-1 text-sm text-gray-500">
+                      <% if current_user.admin? %>
+                        Get started by creating your first project.
+                      <% else %>
+                        Contact your administrator to create projects.
+                      <% end %>
+                    </p>
+                    <% if current_user.admin? %>
+                      <div class="mt-6">
+                        <%= link_to "Add project", new_company_project_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+                      </div>
+                    <% end %>
                   </div>
                 </td>
               </tr>

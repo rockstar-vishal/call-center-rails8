@@ -1,7 +1,7 @@
 class Company::UsersController < Company::BaseController
   before_action :set_users
   before_action :set_user, only: [:show, :edit, :update, :destroy]
-  before_action :ensure_admin_or_manager, except: [:index, :show]
+  before_action :ensure_admin, except: [:index, :show]
 
   def index
     @users = @users.includes(:role).order(:name)
@@ -65,9 +65,9 @@ class Company::UsersController < Company::BaseController
     params.require(:user).permit(:name, :email, :phone, :role_id)
   end
 
-  def ensure_admin_or_manager
-    unless current_user.admin? || current_user.manager?
-      flash[:alert] = "Access denied. Only admins and managers can manage users."
+  def ensure_admin
+    unless current_user.admin?
+      flash[:alert] = "Access denied. Only admins can manage users."
       redirect_to company_users_path
     end
   end

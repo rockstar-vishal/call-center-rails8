@@ -8,12 +8,17 @@ class Company::LeadsController < Company::BaseController
     search_params = extract_search_params
     @leads = @leads.includes(:project, :status, :user)
     
-    if search_params.any?
+    # Handle quick search
+    if params[:quick_search].present?
+      @leads = @leads.quick_search(params[:quick_search])
+      @search_active = true
+      @quick_search_query = params[:quick_search]
+    elsif search_params.any?
       @leads = @leads.smart_search(search_params)
+      @search_active = search_params.any?
     end
     
-    @leads = @leads.order(created_at: :desc).page(params[:page]).per(PER_PAGE)
-    @search_active = search_params.any?
+    @leads = @leads.order("leads.ncd asc nulls first, leads.created_at desc").page(params[:page]).per(PER_PAGE)
   end
 
   def show
@@ -62,11 +67,11 @@ class Company::LeadsController < Company::BaseController
         format.turbo_stream # Will render call.turbo_stream.erb
       else
         @error_message = "Failed to Initiate Call: #{@call_log.errors.full_messages.join(', ')}"
-        format.html { 
+        format.html do
           flash[:alert] = @error_message
-          redirect_to request.referer || company_leads_path 
-        }
-        format.turbo_stream # Will render call.turbo_stream.erb with errors
+          redirect_to (request.referer || company_leads_path)
+        end
+        format.turbo_stream # Will render call.turbo_stream.erb with error
       end
     end
   end
@@ -80,13 +85,6 @@ class Company::LeadsController < Company::BaseController
         format.json { render json: { success: false, errors: [@call_log_error] } }
       end
     elsif @call_log&.update(call_log_params)
-      # Also update the lead's status and NCD if provided
-      lead_updates = {}
-      lead_updates[:status_id] = @call_log.status_id if @call_log.status_id.present?
-      lead_updates[:ncd] = @call_log.ncd if @call_log.ncd.present?
-      
-      @lead.update(lead_updates) if lead_updates.any?
-      
       @redirect_url = request.referer || company_leads_path
       
       respond_to do |format|
@@ -160,6 +158,10 @@ class Company::LeadsController < Company::BaseController
       update_data[:status_id] = update_params[:status_id] if update_params[:status_id].present?
       update_data[:user_id] = update_params[:user_id] if update_params[:user_id].present?
       
+      # Handle deletion checkboxes
+      update_data[:ncd] = nil if update_params[:delete_ncd] == "1"
+      update_data[:comment] = nil if update_params[:delete_comments] == "1"
+      
       if update_data.any?
         if lead.update(update_data)
           updated_count += 1
@@ -207,16 +209,13 @@ class Company::LeadsController < Company::BaseController
     params.require(:lead).permit(:name, :email, :phone, :project_id, :status_id, :user_id, :comment, :ncd)
   end
 
-  def mini_lead_params
-    params.require(:call_log).permit(:status_id, :ncd, :comment)
-  end
 
   def call_log_params
     params.require(:leads_call_log).permit(:status_id, :ncd, :comment)
   end
 
   def bulk_update_params
-    params.permit(:status_id, :user_id)
+    params.permit(:status_id, :user_id, :delete_ncd, :delete_comments)
   end
 
   def extract_search_params

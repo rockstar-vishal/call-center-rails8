@@ -1,6 +1,7 @@
 class Company::ProjectsController < Company::BaseController
   before_action :set_projects
   before_action :set_project, only: [:show, :edit, :update, :destroy]
+  before_action :ensure_admin, except: [:index, :show]
 
   def index
     @projects = @projects.order(:name)
@@ -8,7 +9,11 @@ class Company::ProjectsController < Company::BaseController
 
   def show
     @leads_count = @project.leads.count
-    @recent_leads = @project.leads.includes(:status, :user).order(created_at: :desc).limit(10)
+    
+    respond_to do |format|
+      format.html { render layout: false if request.xhr? }
+      format.json { render json: @project }
+    end
   end
 
   def new
@@ -58,6 +63,13 @@ class Company::ProjectsController < Company::BaseController
   end
 
   def project_params
-    params.require(:project).permit(:name)
+    params.require(:project).permit(:name, :training_website_url, :training_video, :training_doc)
+  end
+
+  def ensure_admin
+    unless current_user.admin?
+      flash[:alert] = "Access denied. Only admins can manage projects."
+      redirect_to company_projects_path
+    end
   end
 end

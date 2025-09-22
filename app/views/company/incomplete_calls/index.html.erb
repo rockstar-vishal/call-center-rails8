@@ -1,0 +1,138 @@
+<% content_for :page_title, "Incomplete Calls" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-xl font-semibold text-gray-900">Incomplete Calls</h1>
+    <p class="mt-2 text-sm text-gray-700">
+      <% case current_user.role.tag %>
+      <% when 'admin' %>
+        View and manage all incomplete call logs across the company.
+      <% when 'manager' %>
+        View and manage incomplete call logs for you and your team.
+      <% else %>
+        View and complete your pending call logs.
+      <% end %>
+    </p>
+  </div>
+</div>
+
+<div class="mt-8 flex flex-col">
+  <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+      <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Lead</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">User</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Project</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Started</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Next Call</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Comment</th>
+              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if @call_logs.any? %>
+              <% @call_logs.each do |call_log| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10">
+                        <div class="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                          <span class="text-white text-sm font-medium">
+                            <%= call_log.lead.name&.first&.upcase || 'L' %>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= call_log.lead.name %>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                          <%= call_log.lead.phone %>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= call_log.user.name || call_log.user.email %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= call_log.lead.project.name %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% if call_log.status %>
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                        <%= call_log.status.name %>
+                      </span>
+                    <% else %>
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                        No Status
+                      </span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= call_log.created_at.strftime("%b %d, %Y %I:%M %p") %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= call_log.ncd ? call_log.ncd.strftime("%b %d, %Y %I:%M %p") : '-' %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    <% if call_log.comment.present? %>
+                      <div class="max-w-xs truncate" title="<%= call_log.comment %>">
+                        <%= call_log.comment %>
+                      </div>
+                    <% else %>
+                      <span class="text-red-500 font-medium">Missing</span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex items-center justify-end space-x-2">
+                      <% unless current_user.admin? %>
+                        <%= link_to "Update", edit_company_incomplete_call_path(call_log), 
+                              class: "inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-900 bg-transparent border-none cursor-pointer rounded-full hover:bg-blue-50 transition-all duration-200",
+                              title: "Complete Call Log" %>
+                      <% end %>
+                      <% if current_user.admin? %>
+                        <%= link_to company_incomplete_call_path(call_log), 
+                              data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete this incomplete call log?" }, 
+                              class: "inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-all duration-200",
+                              title: "Delete Call Log" do %>
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="8" class="px-6 py-12 text-center">
+                  <div class="text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No incomplete calls</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                      <% if current_user.admin? %>
+                        All call logs in the company have been completed.
+                      <% elsif current_user.manager? %>
+                        All call logs for your team have been completed.
+                      <% else %>
+                        You have no incomplete call logs. Great work!
+                      <% end %>
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
