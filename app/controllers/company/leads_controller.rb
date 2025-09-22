@@ -42,6 +42,9 @@ class Company::LeadsController < Company::BaseController
     @lead = @leads.build(lead_params)
     
     if @lead.save
+      # Broadcast the new lead via Action Cable
+      LeadsChannel.broadcast_lead_creation(@lead)
+      
       flash[:notice] = 'Lead was successfully created.'
       redirect_to company_lead_path(@lead)
     else
@@ -90,6 +93,9 @@ class Company::LeadsController < Company::BaseController
       # Reload the lead to get fresh data after call log update
       @lead.reload
       
+      # Broadcast the lead update via Action Cable
+      LeadsChannel.broadcast_lead_update(@lead)
+      
       respond_to do |format|
         format.html { redirect_to @redirect_url, notice: 'Call logged successfully.' }
         format.turbo_stream # Will render submit_call.turbo_stream.erb
@@ -107,6 +113,9 @@ class Company::LeadsController < Company::BaseController
 
   def update
     if @lead.update(lead_params)
+      # Broadcast the lead update via Action Cable
+      LeadsChannel.broadcast_lead_update(@lead)
+      
       flash[:notice] = 'Lead was successfully updated.'
       redirect_to company_lead_path(@lead)
     else

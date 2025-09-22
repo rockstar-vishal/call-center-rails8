@@ -27,7 +27,6 @@ export default class extends Controller {
       }, 500)
     } else {
       // Error handling is done by Rails rendering the form with errors
-      console.log('Form submission had errors, form will be re-rendered with errors')
     }
   }
 

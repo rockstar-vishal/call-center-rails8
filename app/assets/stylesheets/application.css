@@ -9,7 +9,117 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-@import "actiontext.css";
+/* Action Text Styles - Inline to avoid import issues */
+trix-editor {
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  margin: 0;
+  padding: 0.4em 0.6em;
+  min-height: 5em;
+  outline: none;
+}
+
+trix-toolbar {
+  border: 1px solid #bbb;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  background: #f8f8f8;
+  padding: 0.4em;
+}
+
+trix-toolbar .trix-button-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  overflow-x: auto;
+}
+
+trix-toolbar .trix-button-group {
+  display: flex;
+  margin-bottom: 10px;
+  border: 1px solid #bbb;
+  border-top-color: #ccc;
+  border-bottom-color: #888;
+  border-radius: 3px;
+}
+
+trix-toolbar .trix-button {
+  position: relative;
+  float: left;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75em;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0 0.5em;
+  margin: 0;
+  outline: none;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  border-radius: 0;
+  background: transparent;
+}
+
+trix-toolbar .trix-button:not(:first-child) {
+  border-left: 1px solid #ccc;
+}
+
+trix-toolbar .trix-button.trix-active {
+  background: #cbeefa;
+  color: black;
+}
+
+trix-toolbar .trix-button:not(:disabled) {
+  cursor: pointer;
+}
+
+trix-toolbar .trix-button:disabled {
+  color: rgba(0, 0, 0, 0.125);
+}
+
+.trix-content {
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.trix-content * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.trix-content h1 {
+  font-size: 1.2em;
+  line-height: 1.2;
+}
+
+.trix-content blockquote {
+  border: 0 solid #ccc;
+  border-left-width: 0.3em;
+  margin-left: 0.3em;
+  padding-left: 0.6em;
+}
+
+.trix-content li {
+  margin-left: 1em;
+}
+
+.trix-content pre {
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+  font-family: monospace;
+  font-size: 0.9em;
+  padding: 0.5em;
+  white-space: pre;
+  background-color: #eee;
+  overflow-x: auto;
+}
+
+.trix-content img {
+  max-width: 100%;
+  height: auto;
+}
 
 /* Comment Display Styles */
 .comment-content {

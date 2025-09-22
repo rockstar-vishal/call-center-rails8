@@ -135,8 +135,6 @@ export default class extends Controller {
       input.value = leadId
       form.appendChild(input)
     })
-    
-    console.log('Updated hidden inputs:', Array.from(this.selectedLeads))
   }
 
   clearSelection() {

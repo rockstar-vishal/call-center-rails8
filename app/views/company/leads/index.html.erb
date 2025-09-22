@@ -1,6 +1,8 @@
 <% content_for :page_title, "Leads Management" %>
 
-<div data-controller="search-drawer">
+<div data-controller="search-drawer action-cable" 
+     data-action-cable-channel-value="LeadsChannel" 
+     data-action-cable-company-id-value="<%= current_company.id %>">
 
 <div class="sm:flex sm:items-center">
   <div class="sm:flex-auto">
@@ -852,5 +854,6 @@
     </div>
   </div>
 </div>
+
 
 </div>
