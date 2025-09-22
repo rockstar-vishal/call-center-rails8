@@ -2,6 +2,7 @@ class Company::LeadsController < Company::BaseController
   before_action :set_leads
   before_action :set_lead, only: [:show, :edit, :update, :destroy, :call, :submit_call]
   before_action :set_call_log, only: [:submit_call]
+  before_action :check_admin, only: [:edit, :update, :destroy, :bulk_update]
   PER_PAGE = 50
 
   def index
@@ -86,6 +87,8 @@ class Company::LeadsController < Company::BaseController
       end
     elsif @call_log&.update(call_log_params)
       @redirect_url = request.referer || company_leads_path
+      # Reload the lead to get fresh data after call log update
+      @lead.reload
       
       respond_to do |format|
         format.html { redirect_to @redirect_url, notice: 'Call logged successfully.' }
@@ -115,10 +118,6 @@ class Company::LeadsController < Company::BaseController
   end
 
   def destroy
-    unless current_user.admin?
-      flash[:alert] = "You are not authorized to delete leads. This incident has been reported!"
-      return
-    end
     if @lead.destroy
       flash[:notice] = 'Lead was successfully deleted.'
     else
@@ -128,10 +127,6 @@ class Company::LeadsController < Company::BaseController
   end
 
   def bulk_update
-    unless current_user.admin?
-      flash[:alert] = "Access denied. Only admins can perform bulk updates."
-      redirect_to request.referer || company_leads_path and return
-    end
 
     lead_ids = params[:lead_ids]
     
@@ -184,6 +179,13 @@ class Company::LeadsController < Company::BaseController
   end
 
   private
+
+  def check_admin
+    unless current_user.admin?
+      flash[:alert] = "You are not authorized to update leads directly. This incident has been reported!"
+      redirect_to company_leads_path and return
+    end
+  end
 
   def set_lead
     @lead = @leads.find(params[:id])

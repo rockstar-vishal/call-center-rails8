@@ -196,7 +196,7 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <% if @leads.any? %>
               <% @leads.each do |lead| %>
-                <tr>
+                <tr id="lead-row-<%= lead.id %>">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10">
@@ -264,8 +264,36 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <%= lead.ncd ? lead.ncd.strftime("%b %d, %Y") : '-' %>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <%= lead.comment %>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    <div data-controller="comment-display" 
+                         data-comment-display-full-comment-value="<%= lead.comment&.gsub('"', '&quot;') %>"
+                         data-comment-display-lead-id-value="<%= lead.id %>">
+                      <div data-comment-display-target="truncated" class="comment-content">
+                        <% if lead.comment.present? %>
+                          <% truncated_comment = lead.comment.length > 100 ? lead.comment[0..100] + "..." : lead.comment %>
+                          <%= simple_format(truncated_comment, {}, wrapper_tag: "div") %>
+                        <% else %>
+                          <span class="text-gray-400 italic">No comments</span>
+                        <% end %>
+                      </div>
+                      
+                      <% if lead.comment.present? && lead.comment.length > 100 %>
+                        <div class="mt-1 flex space-x-2">
+                          <button data-action="click->comment-display#toggleExpanded" 
+                                  data-comment-display-target="toggleButton"
+                                  class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                            <span data-comment-display-target="toggleText">Show more</span>
+                          </button>
+                          
+                          <% if lead.comment.length > 500 %>
+                            <button data-action="click->comment-display#openModal" 
+                                    class="text-xs text-purple-600 hover:text-purple-800 font-medium">
+                              View full
+                            </button>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex items-center justify-end space-x-2">
@@ -714,7 +742,7 @@
 <!-- Project Details Drawer Modal -->
 <%= modal 'project-details-modal', 
           type: 'drawer-right', 
-          size: 'lg', 
+          size: 'xxl', 
           title: 'Project Details',
           show_close_button: true do %>
   <!-- Content will be loaded here -->
@@ -723,7 +751,7 @@
 <!-- Lead Details Drawer Modal -->
 <%= modal 'lead-details-modal', 
           type: 'drawer-right', 
-          size: 'lg', 
+          size: 'xxl', 
           title: 'Lead Details',
           show_close_button: true do %>
   <!-- Content will be loaded here -->
@@ -768,6 +796,58 @@
       <!-- Content -->
       <div data-modal-target="content" class="flex-1 overflow-y-auto p-6">
         <!-- Content will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Comment Modal -->
+<div id="comment-modal" data-controller="modal" 
+     data-modal-type-value="center" 
+     data-modal-size-value="lg"
+     data-modal-closable-value="true"
+     data-modal-persistent-value="false"
+     class="modal-wrapper">
+  
+  <!-- Overlay -->
+  <div data-modal-target="overlay" 
+       data-action="click->modal#overlayClick"
+       class="hidden fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-40">
+  </div>
+
+  <!-- Modal Container -->
+  <div data-modal-target="container"
+       class="hidden fixed inset-0 flex items-center justify-center p-8 z-50">
+    
+    <!-- Modal Card -->
+    <div class="bg-white shadow-2xl rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col transform transition-all duration-300 ease-in-out">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50/80 backdrop-blur-sm rounded-t-2xl">
+        <div class="flex items-center">
+          <div class="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 data-modal-target="title" class="text-xl font-semibold text-gray-900">Lead Comments</h2>
+            <p class="text-sm text-gray-600">Full comment history for this lead</p>
+          </div>
+        </div>
+        <button data-action="click->modal#closeButtonClick" 
+                class="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Content -->
+      <div data-modal-target="content" class="flex-1 overflow-y-auto p-6">
+        <div class="prose max-w-none">
+          <div id="full-comment-content" class="whitespace-pre-wrap text-gray-700 leading-relaxed"></div>
+        </div>
       </div>
     </div>
   </div>

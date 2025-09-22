@@ -197,6 +197,7 @@ module ApplicationHelper
     when 'md' then 'w-96'
     when 'lg' then 'w-1/2'
     when 'xl' then 'w-2/3'
+    when 'xxl' then 'w-3/4'
     when 'full' then 'w-full'
     else 'w-96'
     end

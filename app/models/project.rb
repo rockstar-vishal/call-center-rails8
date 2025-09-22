@@ -1,6 +1,7 @@
 class Project < ApplicationRecord
   belongs_to :company
   has_many :leads, dependent: :restrict_with_error
+  has_rich_text :reading_material
   
   validates :name, presence: true
   validates_uniqueness_of :name, case_sensitive: false, scope: :company
@@ -13,7 +14,7 @@ class Project < ApplicationRecord
   validate :training_doc_validation, if: -> { training_doc.attached? }
 
   def has_training_content?
-    training_website_url.present? || training_video.present? || training_doc.attached?
+    training_website_url.present? || training_video.present? || training_doc.attached? || reading_material.present?
   end
 
   private

@@ -63,7 +63,7 @@ class Company::ProjectsController < Company::BaseController
   end
 
   def project_params
-    params.require(:project).permit(:name, :training_website_url, :training_video, :training_doc)
+    params.require(:project).permit(:name, :training_website_url, :training_video, :training_doc, :reading_material)
   end
 
   def ensure_admin

@@ -49,7 +49,135 @@
   <script>document.body.classList.remove('overflow-hidden');</script>
 <% end %>
 
-<!-- Show success message and redirect -->
+<!-- Update the specific lead row with fresh data -->
+<%= turbo_stream.replace "lead-row-#{@lead.id}" do %>
+  <tr id="lead-row-<%= @lead.id %>">
+    <td class="px-6 py-4 whitespace-nowrap">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 h-10 w-10">
+          <% if current_user.admin? %>
+            <div data-bulk-selector-target="leadCheckbox"
+                 data-lead-id="<%= @lead.id %>"
+                 data-action="click->bulk-selector#toggleLead"
+                 class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all duration-200 relative">
+              <!-- Initials (shown when not selected) -->
+              <span class="lead-initials text-white text-sm font-medium transition-opacity duration-200">
+                <%= @lead.name&.first&.upcase || 'L' %>
+              </span>
+              <!-- Checkmark (shown when selected) -->
+              <svg class="lead-checkmark h-6 w-6 text-white opacity-0 absolute transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <input type="checkbox" class="absolute inset-0 opacity-0 cursor-pointer">
+            </div>
+          <% else %>
+            <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+              <span class="text-white text-sm font-medium">
+                <%= @lead.name&.first&.upcase || 'L' %>
+              </span>
+            </div>
+          <% end %>
+        </div>
+        <div class="ml-4">
+          <div class="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200" 
+               data-controller="lead-opener"
+               data-action="click->lead-opener#openLead"
+               data-lead-opener-url-value="<%= company_lead_path(@lead) %>"
+               data-lead-opener-name-value="<%= @lead.name %>">
+            <%= @lead.name %>
+          </div>
+        </div>
+      </div>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      <button data-controller="project-drawer"
+              data-project-drawer-url-value="<%= company_project_path(@lead.project) %>"
+              data-project-drawer-name-value="<%= @lead.project.name %>"
+              data-action="click->project-drawer#openProject"
+              class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium transition-colors duration-200">
+        <%= @lead.project.name %>
+      </button>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+        <%= case @lead.status.tag
+            when 'new' then 'bg-gray-100 text-gray-800'
+            when 'contacted' then 'bg-blue-100 text-blue-800'
+            when 'interested' then 'bg-green-100 text-green-800'
+            when 'not_interested' then 'bg-red-100 text-red-800'
+            when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+            when 'converted' then 'bg-green-100 text-green-800'
+            when 'lost' then 'bg-red-100 text-red-800'
+            else 'bg-gray-100 text-gray-800'
+            end %>">
+        <%= @lead.status.name %>
+      </span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      <%= @lead.user.name || @lead.user.email %>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      <%= @lead.ncd ? @lead.ncd.strftime("%b %d, %Y") : '-' %>
+    </td>
+    <td class="px-6 py-4 text-sm text-gray-500">
+      <div data-controller="comment-display" 
+           data-comment-display-full-comment-value="<%= @lead.comment&.gsub('"', '&quot;') %>"
+           data-comment-display-lead-id-value="<%= @lead.id %>">
+        <div data-comment-display-target="truncated" class="comment-content">
+          <% if @lead.comment.present? %>
+            <% truncated_comment = @lead.comment.length > 100 ? @lead.comment[0..100] + "..." : @lead.comment %>
+            <%= simple_format(truncated_comment, {}, wrapper_tag: "div") %>
+          <% else %>
+            <span class="text-gray-400 italic">No comments</span>
+          <% end %>
+        </div>
+        
+        <% if @lead.comment.present? && @lead.comment.length > 100 %>
+          <div class="mt-1 flex space-x-2">
+            <button data-action="click->comment-display#toggleExpanded" 
+                    data-comment-display-target="toggleButton"
+                    class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+              <span data-comment-display-target="toggleText">Show more</span>
+            </button>
+            
+            <% if @lead.comment.length > 500 %>
+              <button data-action="click->comment-display#openModal" 
+                      class="text-xs text-purple-600 hover:text-purple-800 font-medium">
+                View full
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+      <div class="flex items-center justify-end space-x-2">
+        <% unless current_user.admin? %>
+          <button data-controller="call-modal"
+                  data-call-modal-url-value="<%= call_company_lead_path(@lead) %>"
+                  class="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-900 bg-transparent border-none cursor-pointer rounded-full hover:bg-blue-50 transition-all duration-200"
+                  title="Log Call">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+          </button>
+        <% end %>
+        <% if current_user.admin? %>
+          <%= link_to company_lead_path(@lead), 
+              data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete this lead?" }, 
+              class: "inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-all duration-200",
+              title: "Delete Lead" do %>
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          <% end %>
+        <% end %>
+      </div>
+    </td>
+  </tr>
+<% end %>
+
+<!-- Show success message -->
 <%= turbo_stream.prepend "body" do %>
   <div class="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg" id="success-alert">
     <div class="flex items-center">
@@ -61,8 +189,7 @@
     <script>
       setTimeout(() => {
         document.getElementById('success-alert')?.remove();
-        window.location.href = '<%= @redirect_url %>';
-      }, 1500);
+      }, 3000);
     </script>
   </div>
 <% end %>
