@@ -1,6 +1,7 @@
 class Leads::CallLog < ApplicationRecord
   belongs_to :lead
   belongs_to :user
+  belongs_to :company, class_name: "::Company"
   belongs_to :status, optional: true
 
   validate :comment_mandatory, on: :create
@@ -10,7 +11,13 @@ class Leads::CallLog < ApplicationRecord
 
   after_save :update_lead
 
+  before_validation :set_defaults, on: :create
+
   ATTEMPT_LIMIT = 2
+
+  def set_defaults
+    self.company_id = self.lead.company_id if self.company_id.blank?
+  end
 
   def update_lead
     self.lead.status_id = self.status_id if self.status.present?

@@ -6,6 +6,7 @@ class Company < ApplicationRecord
 	has_many :users, dependent: :restrict_with_error
 	has_many :leads, dependent: :restrict_with_error
 	has_many :projects, dependent: :restrict_with_error
+	has_many :call_logs, class_name: "::Leads::CallLog"
 
 	# Logo and icon attachments
 	has_one_attached :logo
