@@ -200,7 +200,7 @@
                 <div class="ml-3">
                   <h3 class="text-sm font-medium text-blue-800">Assignment Form</h3>
                   <div class="mt-2 text-sm text-blue-700">
-                    <p>Assign <span id="lead-count-display">0</span> leads to <span id="user-display">selected user</span></p>
+                    <p>Assign <span id="lead-count-display"><%= @filtered_count %></span> leads to <span id="user-display">selected user</span></p>
                   </div>
                 </div>
               </div>
@@ -218,7 +218,8 @@
                       value: [1, @filtered_count].min, 
                       required: true,
                       class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
-                      id: "lead-count-input" %>
+                      id: "lead-count-input",
+                      oninput: "updateLeadCountFromInput(this)" %>
                 <p class="mt-1 text-xs text-gray-500">Maximum: <%= @filtered_count %> leads</p>
               </div>
 
@@ -231,18 +232,34 @@
                       options_from_collection_for_select(@users, :id, :name), 
                       { prompt: "Select a user..." }, 
                       { required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
-                        id: "assign-user-select" } %>
+                        id: "assign-user-select", 
+                        onchange: "updateUserDisplay(this)" } %>
               </div>
 
-              <!-- Assign Project Dropdown -->
+              <!-- Regenerate Checkbox -->
               <div>
-                <%= form.label :assign_project_id, "Assign to Project", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                <%= form.select :assign_project_id, 
-                      options_from_collection_for_select(@projects, :id, :name), 
-                      { prompt: "Select a project..." }, 
-                      { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
-                        id: "assign-project-select" } %>
+                <div class="flex items-center">
+                  <%= form.check_box :regenerate_checked, 
+                        { class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded",
+                          id: "regenerate-checkbox",
+                          onchange: "toggleProjectDropdown(this)" }, 
+                        "1", "0" %>
+                  <%= form.label :regenerate_checked, "Regenerate", class: "ml-2 block text-sm font-medium text-gray-700" %>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Check to assign leads to a different project</p>
               </div>
+
+                <!-- Assign Project Dropdown (hidden by default) -->
+                <div id="project-dropdown-container" class="hidden">
+                  <%= form.label :assign_project_id, "Select New Project", class: "block text-sm font-medium text-gray-700 mb-2" do %>
+                    Select New Project <span class="text-red-500">*</span>
+                  <% end %>
+                  <%= form.select :assign_project_id, 
+                        options_from_collection_for_select(@projects, :id, :name), 
+                        { prompt: "Select a project..." }, 
+                        { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                          id: "assign-project-select" } %>
+                </div>
             </div>
 
             <div class="flex justify-end">
@@ -270,6 +287,66 @@
 
 
 <script>
+// Global function for user display update
+function updateUserDisplay(selectElement) {
+  const userDisplay = document.getElementById('user-display');
+  if (userDisplay && selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    userDisplay.textContent = selectedOption ? selectedOption.text : 'selected user';
+  }
+}
+
+// Global function to update lead count display
+function updateLeadCountDisplay(count) {
+  const leadCountDisplay = document.getElementById('lead-count-display');
+  const leadCountInput = document.getElementById('lead-count-input');
+  const maxCountText = document.querySelector('.mt-1.text-xs.text-gray-500');
+  
+  if (leadCountDisplay) {
+    leadCountDisplay.textContent = count;
+  }
+  if (leadCountInput) {
+    leadCountInput.max = count;
+    if (leadCountInput.value > count) {
+      leadCountInput.value = count;
+    }
+  }
+  if (maxCountText) {
+    maxCountText.textContent = `Maximum: ${count} leads`;
+  }
+}
+
+// Global function to update lead count from input field
+function updateLeadCountFromInput(inputElement) {
+  const leadCountDisplay = document.getElementById('lead-count-display');
+  if (leadCountDisplay && inputElement) {
+    leadCountDisplay.textContent = inputElement.value || '0';
+  }
+}
+
+// Global function to toggle project dropdown visibility
+function toggleProjectDropdown(checkboxElement) {
+  const projectContainer = document.getElementById('project-dropdown-container');
+  if (projectContainer && checkboxElement) {
+    if (checkboxElement.checked) {
+      projectContainer.classList.remove('hidden');
+      // Make project selection required when regenerate is checked
+      const projectSelect = document.getElementById('assign-project-select');
+      if (projectSelect) {
+        projectSelect.required = true;
+      }
+    } else {
+      projectContainer.classList.add('hidden');
+      // Clear the project selection when hiding
+      const projectSelect = document.getElementById('assign-project-select');
+      if (projectSelect) {
+        projectSelect.selectedIndex = 0;
+        projectSelect.required = false;
+      }
+    }
+  }
+}
+
 // Update the display when lead count or user changes
 document.addEventListener('DOMContentLoaded', function() {
   const leadCountInput = document.getElementById('lead-count-input');

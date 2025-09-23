@@ -1,0 +1,194 @@
+<div class="bg-white shadow rounded-lg mb-6" data-controller="collapsible-menu">
+  <!-- Smart Search Header with Toggle Button -->
+  <div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900">Smart Search</h3>
+        <p class="mt-1 text-sm text-gray-600">
+          Filter your report data
+          <% if defined?(@start_date) && defined?(@end_date) %>
+            • From: <%= @start_date.strftime("%B %d, %Y") %> to <%= @end_date.strftime("%B %d, %Y") %>
+          <% end %>
+        </p>
+      </div>
+      <button data-action="click->collapsible-menu#toggle"
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <span data-collapsible-menu-target="buttonText">Show Filters</span>
+        <svg data-collapsible-menu-target="icon" class="ml-2 -mr-0.5 h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Collapsible Smart Search Content -->
+  <div data-collapsible-menu-target="content" class="hidden">
+    <div class="p-6">
+      <%= form_with url: request.path, method: :get, local: true, class: "space-y-6" do |form| %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <% if fields.include?(:projects) %>
+            <!-- Projects Multiselect -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Projects</label>
+              <div class="relative">
+                <div data-controller="multiselect-dropdown" 
+                     data-multiselect-dropdown-placeholder-value="Select projects..."
+                     data-multiselect-dropdown-search-placeholder-value="Search projects..."
+                     class="relative">
+                  <div data-action="click->multiselect-dropdown#toggle"
+                       data-multiselect-dropdown-target="input"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    Select projects...
+                  </div>
+                  <div data-multiselect-dropdown-target="dropdown" 
+                       class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div class="p-2">
+                      <input data-multiselect-dropdown-target="searchInput"
+                             data-action="input->multiselect-dropdown#search"
+                             type="text"
+                             placeholder="Search projects..."
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div data-multiselect-dropdown-target="options" class="max-h-48 overflow-y-auto p-2">
+                      <% current_user.company.projects.order(:name).each do |project| %>
+                        <label class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer rounded">
+                          <input type="checkbox" 
+                                 name="project_ids[]" 
+                                 value="<%= project.id %>"
+                                 <%= 'checked' if params[:project_ids]&.include?(project.id.to_s) %>
+                                 data-action="change->multiselect-dropdown#toggleOption"
+                                 class="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                          <%= project.name %>
+                        </label>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <% if fields.include?(:statuses) %>
+            <!-- Statuses Multiselect -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Statuses</label>
+              <div class="relative">
+                <div data-controller="multiselect-dropdown" 
+                     data-multiselect-dropdown-placeholder-value="Select statuses..."
+                     data-multiselect-dropdown-search-placeholder-value="Search statuses..."
+                     class="relative">
+                  <div data-action="click->multiselect-dropdown#toggle"
+                       data-multiselect-dropdown-target="input"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    Select statuses...
+                  </div>
+                  <div data-multiselect-dropdown-target="dropdown" 
+                       class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div class="p-2">
+                      <input data-multiselect-dropdown-target="searchInput"
+                             data-action="input->multiselect-dropdown#search"
+                             type="text"
+                             placeholder="Search statuses..."
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div data-multiselect-dropdown-target="options" class="max-h-48 overflow-y-auto p-2">
+                      <% Status.order(:name).each do |status| %>
+                        <label class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer rounded">
+                          <input type="checkbox" 
+                                 name="status_ids[]" 
+                                 value="<%= status.id %>"
+                                 <%= 'checked' if params[:status_ids]&.include?(status.id.to_s) %>
+                                 data-action="change->multiselect-dropdown#toggleOption"
+                                 class="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                          <%= status.name %>
+                        </label>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <% if fields.include?(:users) %>
+            <!-- Users Multiselect -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Users</label>
+              <div class="relative">
+                <div data-controller="multiselect-dropdown" 
+                     data-multiselect-dropdown-placeholder-value="Select users..."
+                     data-multiselect-dropdown-search-placeholder-value="Search users..."
+                     class="relative">
+                  <div data-action="click->multiselect-dropdown#toggle"
+                       data-multiselect-dropdown-target="input"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    Select users...
+                  </div>
+                  <div data-multiselect-dropdown-target="dropdown" 
+                       class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div class="p-2">
+                      <input data-multiselect-dropdown-target="searchInput"
+                             data-action="input->multiselect-dropdown#search"
+                             type="text"
+                             placeholder="Search users..."
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div data-multiselect-dropdown-target="options" class="max-h-48 overflow-y-auto p-2">
+                      <% current_user.company.users.order(:name).each do |user| %>
+                        <label class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer rounded">
+                          <input type="checkbox" 
+                                 name="user_ids[]" 
+                                 value="<%= user.id %>"
+                                 <%= 'checked' if params[:user_ids]&.include?(user.id.to_s) %>
+                                 data-action="change->multiselect-dropdown#toggleOption"
+                                 class="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                          <%= user.name %>
+                        </label>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <% if fields.include?(:date_range) %>
+            <!-- Date Range -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+              <%= form.date_field :created_at_from, 
+                    value: (params[:created_at_from].present? ? params[:created_at_from] : @start_date.strftime("%Y-%m-%d")), 
+                    class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Date Upto</label>
+              <%= form.date_field :created_at_upto, 
+                    value: (params[:created_at_upto].present? ? params[:created_at_upto] : @end_date.strftime("%Y-%m-%d")), 
+                    class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+            </div>
+          <% end %>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+          <div class="flex space-x-3">
+            <%= form.submit "Apply Filters", 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            
+            <%= link_to "Clear Filters", request.path, 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
+          
+          <% if defined?(result_count) %>
+            <div class="text-sm text-gray-600">
+              <span class="font-medium"><%= result_count %></span> results found
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

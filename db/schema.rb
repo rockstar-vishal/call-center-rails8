@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_22_193632) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_130545) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_193632) do
     t.string "crm_domain"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "code"
   end
 
   create_table "leads", force: :cascade do |t|
@@ -78,6 +79,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_193632) do
     t.datetime "updated_at", null: false
     t.datetime "user_assinged_on"
     t.integer "churn_count"
+    t.string "code"
     t.index ["company_id"], name: "index_leads_on_company_id"
     t.index ["project_id"], name: "index_leads_on_project_id"
     t.index ["status_id"], name: "index_leads_on_status_id"
@@ -153,6 +155,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_193632) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.string "code"
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

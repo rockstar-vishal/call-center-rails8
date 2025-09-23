@@ -250,7 +250,7 @@ class Company::LeadsController < Company::BaseController
     search_params[:phone] = params[:search_phone] if params[:search_phone].present?
     search_params[:comment] = params[:search_comment] if params[:search_comment].present?
     search_params[:max_rechurns] = params[:search_max_rechurns] if params[:search_max_rechurns].present?
-    
+    search_params[:code] = params[:search_code] if params[:search_code].present?
     # Array parameters (multiselect)
     search_params[:status_ids] = params[:search_status_ids] if params[:search_status_ids].present?
     search_params[:project_ids] = params[:search_project_ids] if params[:search_project_ids].present?

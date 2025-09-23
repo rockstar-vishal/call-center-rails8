@@ -1,4 +1,6 @@
 class Lead < ApplicationRecord
+  include ::Codeable
+  CODEABLE = {prefix: "LD", length: 4}
   belongs_to :company
   belongs_to :project
   belongs_to :status
@@ -7,6 +9,8 @@ class Lead < ApplicationRecord
 
   validates :phone, presence: true
   validate :company_lead_limit_not_exceeded, on: :create
+
+  validate :phone_unique_for_company
 
   before_validation :set_defaults, on: :create
 
@@ -17,6 +21,14 @@ class Lead < ApplicationRecord
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
     self.user_assinged_on = Time.zone.now
     self.churn_count = 0
+  end
+
+  def phone_unique_for_company
+    to_check_phone = self.phone.to_s.gsub(" ", "").last(10)
+    leads = self.company.leads.where.not(id: self.id).where(project_id: self.project_id).where("RIGHT(REPLACE(leads.phone, ' ', ''), 10) = ?", to_check_phone)
+    if leads.present?
+      errors.add(:phone, "is taken - lead with this phone is already exits - #{leads.last.code}")
+    end
   end
 
   def set_user_assinged_on
@@ -80,6 +92,10 @@ class Lead < ApplicationRecord
       # Filter by email (case-insensitive)
       if search_params[:email].present?
         leads = leads.where("leads.email ILIKE ?", "%#{sanitize_sql_like(search_params[:email])}%")
+      end
+
+      if search_params[:code].present?
+        leads = leads.where("leads.code ILIKE ?", "#{sanitize_sql_like(search_params[:code])}")
       end
 
       if search_params[:max_rechurns].present?

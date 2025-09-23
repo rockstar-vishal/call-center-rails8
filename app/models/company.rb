@@ -1,5 +1,7 @@
 class Company < ApplicationRecord
 	include Nameable
+	include ::Codeable
+	CODEABLE = {prefix: "CO", length: 3}
 	validates :domain, presence: true
 	has_many :users, dependent: :restrict_with_error
 	has_many :leads, dependent: :restrict_with_error

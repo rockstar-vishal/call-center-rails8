@@ -30,6 +30,7 @@ class Company::RechurnLeadsController < Company::BaseController
     lead_count = params[:lead_count].to_i
     assign_user_id = params[:assign_user_id]
     assign_project_id = params[:assign_project_id]
+    regenerate_checked = params[:regenerate_checked] == "1"
     
     # Validate required fields
     if lead_count <= 0
@@ -41,38 +42,54 @@ class Company::RechurnLeadsController < Company::BaseController
       flash[:alert] = "Please select a user to assign leads to."
       redirect_to company_rechurn_leads_path and return
     end
+    
+    if regenerate_checked && assign_project_id.blank?
+      flash[:alert] = "Please select a project when regenerate is checked."
+      redirect_to company_rechurn_leads_path and return
+    end
     @filtered_leads = @filtered_leads.limit(lead_count.to_i)
     updated_count = 0
     errors = []
     
     # Individual transactions per lead - if one fails, others continue
-    @filtered_leads.each do |lead|
-      update_data = {}
-      update_data[:user_id] = assign_user_id
-      update_data[:project_id] = assign_project_id if assign_project_id.present?
-      update_data[:churn_count] = (lead.churn_count.to_i + 1)
-      
-      ActiveRecord::Base.transaction do
-        # Delete call logs
-        lead.call_logs.destroy_all
-        
-        # Update the lead
-        if lead.update(update_data)
+    if regenerate_checked
+      @filtered_leads.each do |lead|
+        new_lead = lead.company.leads.build(project_id: assign_project_id, user_id: assign_user_id, phone: lead.phone, email: lead.email, name: lead.name)
+        if new_lead.save
           updated_count += 1
         else
-          errors << "#{lead.name}: #{lead.errors.full_messages.join(', ')}"
-          raise ActiveRecord::Rollback  # Rolls back only THIS lead
+          errors << "#{lead.name}: #{new_lead.errors.full_messages.join(', ')}"
+        end
+      end  
+    else
+      @filtered_leads.each do |lead|
+        update_data = {}
+        update_data[:user_id] = assign_user_id
+        update_data[:project_id] = assign_project_id if regenerate_checked && assign_project_id.present?
+        update_data[:churn_count] = (lead.churn_count.to_i + 1) if lead.comment.present?
+        
+        ActiveRecord::Base.transaction do
+          # Delete call logs
+          lead.call_logs.destroy_all
+          
+          # Update the lead
+          if lead.update(update_data)
+            updated_count += 1
+          else
+            errors << "#{lead.name}: #{lead.errors.full_messages.join(', ')}"
+            raise ActiveRecord::Rollback  # Rolls back only THIS lead
+          end
         end
       end
     end
-    
+    message_text = regenerate_checked ? "Regenerated" : "Rechurned"
     if updated_count > 0
-      flash[:notice] = "Successfully rechurned #{updated_count} lead(s)."
+      flash[:notice] = "Successfully #{message_text} #{updated_count} lead(s)."
       if errors.any?
-        flash[:alert] = "Some leads couldn't be rechurned: #{errors.first(3).join('; ')}"
+        flash[:alert] = "Some leads couldn't be #{message_text}: #{errors.first(3).join('; ')}"
       end
     else
-      flash[:alert] = "Rechurn failed for all leads. #{errors.first(3).join('; ')}"
+      flash[:alert] = "Error in entire operation. #{errors.first(3).join('; ')}"
     end
     
     redirect_to company_rechurn_leads_path

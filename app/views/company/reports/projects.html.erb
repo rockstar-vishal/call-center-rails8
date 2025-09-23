@@ -1,0 +1,102 @@
+<% content_for :page_title, "Projects Report" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-gray-900">Projects Report</h1>
+      <p class="mt-1 text-sm text-gray-600">Lead distribution across projects and statuses</p>
+    </div>
+  </div>
+
+  <!-- Smart Search -->
+  <%= render 'shared/reports_smart_search', fields: [:date_range, :users], result_count: @result_count %>
+
+  <!-- Projects Report Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Project
+            </th>
+            <% @statuses.each do |status| %>
+              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= status.name %>
+              </th>
+            <% end %>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-100">
+              Total
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% 
+            # Calculate totals for each project (row totals)
+            project_totals = {}
+            @projects.each do |project|
+              project_totals[project.id] = @data.select { |d| d["project_id"] == project.id }.sum { |d| d["count"] || 0 }
+            end
+            
+            # Calculate totals for each status (column totals)
+            status_totals = {}
+            @statuses.each do |status|
+              status_totals[status.id] = @data.select { |d| d["status_id"] == status.id }.sum { |d| d["count"] || 0 }
+            end
+            
+            # Grand total
+            grand_total = @data.sum { |d| d["count"] || 0 }
+          %>
+          
+          <% @projects.each do |project| %>
+            <% this_project_data = @data.select{|k| k["project_id"] == project.id} %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= project.name %>
+              </td>
+              <% @statuses.each do |status| %>
+                <% this_status_data = this_project_data.detect{|k| k["status_id"] == status.id} %>
+                <% lead_count = (this_status_data["count"] rescue 0) %>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  <% if lead_count > 0 %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <%= lead_count  %>
+                    </span>
+                  <% else %>
+                    <span class="text-gray-400">-</span>
+                  <% end %>
+                </td>
+              <% end %>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center bg-gray-50">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  <%= project_totals[project.id] %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+          
+          <!-- Total Row -->
+          <tr class="bg-gray-50 border-t-2 border-gray-300">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+              Total
+            </td>
+            <% @statuses.each do |status| %>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <%= status_totals[status.id] %>
+                </span>
+              </td>
+            <% end %>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center bg-gray-200">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900">
+                <%= grand_total %>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

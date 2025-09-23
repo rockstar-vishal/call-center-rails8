@@ -232,6 +232,11 @@
                              data-lead-opener-url-value="<%= company_lead_path(lead) %>"
                              data-lead-opener-name-value="<%= lead.name %>">
                           <%= lead.name %>
+                          <% if lead.code.present? %>
+                            <div class="text-xs text-gray-500 mt-1">
+                              Code: <%= lead.code %>
+                            </div>
+                          <% end %>
                         </div>
                       </div>
                     </div>
@@ -553,6 +558,22 @@
                   value: params[:search_email],
                   class: "block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200",
                   placeholder: "Search by email..." %>
+          </div>
+        </div>
+
+        <!-- Lead Code Search -->
+        <div class="space-y-2">
+          <%= form.label :search_code, "Lead Code", class: "block text-sm font-semibold text-gray-700" %>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+              </svg>
+            </div>
+            <%= form.text_field :search_code, 
+                  value: params[:search_code],
+                  class: "block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200",
+                  placeholder: "Search by lead code..." %>
           </div>
         </div>
 
