@@ -16,6 +16,7 @@ class Lead < ApplicationRecord
     self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
     self.user_assinged_on = Time.zone.now
+    self.churn_count = 0
   end
 
   def set_user_assinged_on
@@ -79,6 +80,10 @@ class Lead < ApplicationRecord
       # Filter by email (case-insensitive)
       if search_params[:email].present?
         leads = leads.where("leads.email ILIKE ?", "%#{sanitize_sql_like(search_params[:email])}%")
+      end
+
+      if search_params[:max_rechurns].present?
+        leads = leads.where("leads.churn_count <= ?", search_params[:max_rechurns])
       end
       
       # Filter by phone (case-insensitive)

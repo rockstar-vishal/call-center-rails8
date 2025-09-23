@@ -164,13 +164,25 @@ class Company::LeadsController < Company::BaseController
       
       # Handle deletion checkboxes
       update_data[:ncd] = nil if update_params[:delete_ncd] == "1"
-      update_data[:comment] = nil if update_params[:delete_comments] == "1"
       
-      if update_data.any?
-        if lead.update(update_data)
-          updated_count += 1
-        else
-          errors << "#{lead.name}: #{lead.errors.full_messages.join(', ')}"
+      if update_data.any? || update_params[:delete_comments] == "1"
+        # Use transaction to ensure data integrity
+        ActiveRecord::Base.transaction do
+          # Handle comment deletion within transaction
+          if update_params[:delete_comments] == "1"
+            update_data[:churn_count] = (lead.churn_count.to_i + 1) if lead.comment.present?
+            update_data[:comment] = nil
+            # Delete all call logs for this lead
+            lead.call_logs.destroy_all
+          end
+          
+          # Update the lead
+          if lead.update(update_data)
+            updated_count += 1
+          else
+            errors << "#{lead.name}: #{lead.errors.full_messages.join(', ')}"
+            raise ActiveRecord::Rollback
+          end
         end
       end
     end
@@ -237,6 +249,7 @@ class Company::LeadsController < Company::BaseController
     search_params[:email] = params[:search_email] if params[:search_email].present?
     search_params[:phone] = params[:search_phone] if params[:search_phone].present?
     search_params[:comment] = params[:search_comment] if params[:search_comment].present?
+    search_params[:max_rechurns] = params[:search_max_rechurns] if params[:search_max_rechurns].present?
     
     # Array parameters (multiselect)
     search_params[:status_ids] = params[:search_status_ids] if params[:search_status_ids].present?

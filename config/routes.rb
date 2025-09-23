@@ -48,6 +48,11 @@ Rails.application.routes.draw do
     
     resources :projects
     resources :incomplete_calls, only: [:index, :show, :edit, :update, :destroy]
+    resources :rechurn_leads, only: [:index] do
+      collection do
+        post :perform_rechurn
+      end
+    end
     namespace :reports do
       get :projects
       get :productivity
