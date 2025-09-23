@@ -21,35 +21,27 @@ class ProductivityReportService
 
     productivity_data = {}
     productivity_results.each do |result|
-      productivity_data[result.user_id] = {
-        '8am_10am' => result.count_8am_10am.to_i,
-        '10am_2pm' => result.count_10am_2pm.to_i,
-        '2pm_4pm' => result.count_2pm_4pm.to_i,
-        '4pm_6pm' => result.count_4pm_6pm.to_i,
-        '6pm_8pm' => result.count_6pm_8pm.to_i,
-        '8pm_10pm' => result.count_8pm_10pm.to_i,
-        'others' => result.count_others.to_i
-      }
+      user_data = {}
+      TimeIntervals.all.each do |interval|
+        column_name = "count_#{interval[:name]}"
+        user_data[interval[:name]] = result.send(column_name).to_i
+      end
+      productivity_data[result.user_id] = user_data
     end
 
     productivity_data
   end
 
   def calculate_totals
-    totals = {
-      '8am_10am' => 0,
-      '10am_2pm' => 0,
-      '2pm_4pm' => 0,
-      '4pm_6pm' => 0,
-      '6pm_8pm' => 0,
-      '8pm_10pm' => 0,
-      'others' => 0
-    }
+    totals = {}
+    TimeIntervals.all.each do |interval|
+      totals[interval[:name]] = 0
+    end
 
     productivity_data = calculate_productivity_data
     productivity_data.each_value do |user_data|
-      totals.each_key do |key|
-        totals[key] += user_data[key]
+      user_data.each do |interval_name, count|
+        totals[interval_name] += count
       end
     end
 
@@ -57,27 +49,16 @@ class ProductivityReportService
   end
 
   def time_interval_select_clause
-    pg_timezone = postgresql_timezone
-    timezone_conversion = "leads_call_logs.created_at AT TIME ZONE 'UTC' AT TIME ZONE '#{pg_timezone}'"
+    timezone_conversion = TimeRangeFilterService.timezone_conversion_string('leads_call_logs')
     
-    <<~SQL
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 8 AND EXTRACT(hour FROM #{timezone_conversion}) < 10 THEN 1 ELSE 0 END) as count_8am_10am,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 10 AND EXTRACT(hour FROM #{timezone_conversion}) < 14 THEN 1 ELSE 0 END) as count_10am_2pm,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 14 AND EXTRACT(hour FROM #{timezone_conversion}) < 16 THEN 1 ELSE 0 END) as count_2pm_4pm,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 16 AND EXTRACT(hour FROM #{timezone_conversion}) < 18 THEN 1 ELSE 0 END) as count_4pm_6pm,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 18 AND EXTRACT(hour FROM #{timezone_conversion}) < 20 THEN 1 ELSE 0 END) as count_6pm_8pm,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= 20 AND EXTRACT(hour FROM #{timezone_conversion}) < 22 THEN 1 ELSE 0 END) as count_8pm_10pm,
-      SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) < 8 OR EXTRACT(hour FROM #{timezone_conversion}) >= 22 THEN 1 ELSE 0 END) as count_others
-    SQL
-  end
-
-  def postgresql_timezone
-    case Time.zone.name
-    when 'Kolkata' then 'Asia/Kolkata'
-    when 'New York' then 'America/New_York'
-    when 'London' then 'Europe/London'
-    when 'Tokyo' then 'Asia/Tokyo'
-    else Time.zone.name
+    select_clauses = TimeIntervals.all.map do |interval|
+      if interval[:name] == 'others'
+        "SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) < 8 OR EXTRACT(hour FROM #{timezone_conversion}) >= 22 THEN 1 ELSE 0 END) as count_#{interval[:name]}"
+      else
+        "SUM(CASE WHEN EXTRACT(hour FROM #{timezone_conversion}) >= #{interval[:start_hour]} AND EXTRACT(hour FROM #{timezone_conversion}) < #{interval[:end_hour]} THEN 1 ELSE 0 END) as count_#{interval[:name]}"
+      end
     end
+    
+    select_clauses.join(",\n      ")
   end
 end

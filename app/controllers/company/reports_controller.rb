@@ -9,6 +9,7 @@ class Company::ReportsController < Company::BaseController
 		logs = logs.where(status_id: params[:status_ids]) if params[:status_ids].present?
 		logs = logs.where.not(comment: nil) if params[:comment_edited].present?
 		logs = logs.where.not(status_id: nil) if params[:status_edited].present?
+		logs = TimeRangeFilterService.new(logs, params[:time_range]).call
 		return logs
 	end
 
