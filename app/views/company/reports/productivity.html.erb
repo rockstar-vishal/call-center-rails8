@@ -38,7 +38,7 @@
               <% TimeIntervals.all.each do |interval| %>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= interval[:color_class] %>">
-                    <%= link_to (user_data[interval[:name]] || 0), detail_path(user_ids: [user.id], time_range: interval[:name]) %>
+                    <%= link_to (user_data[interval[:name]] || 0), detail_path(user_ids: [user.id], time_range: interval[:name]), target: "_blank" %>
                   </span>
                 </td>
               <% end %>
@@ -53,7 +53,7 @@
             <% TimeIntervals.all.each do |interval| %>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= interval[:total_color_class] %>">
-                  <%= link_to @totals[interval[:name]], detail_path(time_range: interval[:name]) %>
+                  <%= link_to @totals[interval[:name]], detail_path(time_range: interval[:name]), target: "_blank" %>
                 </span>
               </td>
             <% end %>

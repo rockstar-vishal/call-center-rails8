@@ -1,7 +1,7 @@
 class Company::ReportsController < Company::BaseController
 	before_action :ensure_manager_or_admin_access
-	before_action :set_created_start_end, only: [:projects, :activity, :productivity, :details]
-	before_action :set_call_logs, only: [:projects, :activity, :productivity, :details]
+	before_action :set_created_start_end, only: [:projects, :activity, :productivity, :details, :lead_details]
+	before_action :set_call_logs, only: [:projects, :activity, :productivity, :details, :lead_details]
 
 	def filter_call_logs logs
 		logs = logs.where(user_id: params[:user_ids]) if params[:user_ids].present?
@@ -47,6 +47,14 @@ class Company::ReportsController < Company::BaseController
 
 	def details
 		@filtered_logs = filter_call_logs @call_logs
+		# Set result count for display
+		@result_count = @filtered_logs.count
+	end
+
+	def lead_details
+		@filtered_logs = filter_call_logs @call_logs
+		uniq_lead_ids = @filtered_logs.map(&:lead_id)
+		@leads = current_company.leads.where(id: uniq_lead_ids).accessible_by(current_user)
 		# Set result count for display
 		@result_count = @filtered_logs.count
 	end
