@@ -1,21 +1,14 @@
 class Company::ReportsController < Company::BaseController
 	before_action :ensure_manager_or_admin_access
-	before_action :set_created_start_end, only: [:projects, :activity, :productivity]
-	before_action :set_leads, only: []
-	before_action :set_call_logs, only: [:projects, :activity, :productivity]
-	
-	# Helper method for smart search - can be overridden in individual report methods
-	def apply_smart_search_filters(leads = @leads)
-		leads = leads.where(project_id: params[:project_ids]) if params[:project_ids].present?
-		leads = leads.where(status_id: params[:status_ids]) if params[:status_ids].present?
-		leads = leads.where(user_id: params[:user_ids]) if params[:user_ids].present?
-		leads = leads.where(created_at: @start_date..@end_date) if @start_date && @end_date
-		leads
-	end
+	before_action :set_created_start_end, only: [:projects, :activity, :productivity, :details]
+	before_action :set_call_logs, only: [:projects, :activity, :productivity, :details]
 
 	def filter_call_logs logs
 		logs = logs.where(user_id: params[:user_ids]) if params[:user_ids].present?
 		logs = logs.joins(:lead).where(lead: {project_id: params[:project_ids]}) if params[:project_ids].present?
+		logs = logs.where(status_id: params[:status_ids]) if params[:status_ids].present?
+		logs = logs.where.not(comment: nil) if params[:comment_edited].present?
+		logs = logs.where.not(status_id: nil) if params[:status_edited].present?
 		return logs
 	end
 
@@ -51,6 +44,17 @@ class Company::ReportsController < Company::BaseController
 		@result_count = result[:result_count]
 	end
 
+	def details
+		@filtered_logs = filter_call_logs @call_logs
+		# Set result count for display
+		@result_count = @filtered_logs.count
+	end
+
+	def detail_path args=nil
+		return company_reports_details_path(created_at_from: @start_date.to_date, created_at_upto: @end_date.to_date, user_ids: params[:user_ids], status_ids: params[:status_ids], project_ids: params[:project_ids], **args)
+	end
+	helper_method :detail_path
+
 	private
 
 	def ensure_manager_or_admin_access
@@ -58,10 +62,6 @@ class Company::ReportsController < Company::BaseController
 			flash[:alert] = "You don't have permission to access reports."
 			redirect_to company_dashboard_path
 		end
-	end
-
-	def set_leads
-		@leads = current_user.company.leads.accessible_by(current_user)
 	end
 
 	def set_call_logs

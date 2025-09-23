@@ -46,6 +46,16 @@
         <dt class="text-sm font-medium text-gray-500">Project</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @lead.project.name %></dd>
       </div>
+      <% if @lead.code.present? %>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Lead Code</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <%= @lead.code %>
+            </span>
+          </dd>
+        </div>
+      <% end %>
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Status</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">

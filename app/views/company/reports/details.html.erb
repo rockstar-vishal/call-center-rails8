@@ -1,0 +1,211 @@
+<% content_for :page_title, "Call Log Details" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Call Log Details</h1>
+          <p class="mt-1 text-sm text-gray-600">Detailed view of filtered call logs</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            <%= @filtered_logs.count %> records
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Call Logs Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Lead
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Called By
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Project Pitched
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Updated Status
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Updated Comment
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Updated NCD
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Action Date & Time
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% if @filtered_logs.any? %>
+            <% @filtered_logs.includes(:lead, :user, :status, lead: :project).each do |call_log| %>
+              <tr class="hover:bg-gray-50">
+                <!-- Lead Information -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">
+                          <%= call_log.lead.name&.first&.upcase || 'L' %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200" 
+                           data-controller="lead-opener"
+                           data-action="click->lead-opener#openLead"
+                           data-lead-opener-url-value="<%= company_lead_path(call_log.lead) %>"
+                           data-lead-opener-name-value="<%= call_log.lead.name %>">
+                        <%= call_log.lead.name %>
+                        <% if call_log.lead.code.present? %>
+                          <div class="text-xs text-gray-500 mt-1">
+                            Code: <%= call_log.lead.code %>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        <%= call_log.lead.phone %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- User Information -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= call_log.user.name || call_log.user.email %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <%= call_log.user.role.name %>
+                  </div>
+                </td>
+
+                <!-- Project Information -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= call_log.lead.project.name %>
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if call_log.status.present? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      <%= case call_log.status.tag
+                          when 'new' then 'bg-gray-100 text-gray-800'
+                          when 'contacted' then 'bg-blue-100 text-blue-800'
+                          when 'interested', 'hot' then 'bg-green-100 text-green-800'
+                          when 'not_interested', 'dead' then 'bg-red-100 text-red-800'
+                          when 'follow_up' then 'bg-yellow-100 text-yellow-800'
+                          when 'converted' then 'bg-green-100 text-green-800'
+                          when 'lost' then 'bg-red-100 text-red-800'
+                          when 'attempted' then 'bg-gray-100 text-gray-800'
+                          when 'cbt' then 'bg-teal-100 text-teal-800'
+                          else 'bg-gray-100 text-gray-800'
+                          end %>">
+                      <%= call_log.status.name %>
+                    </span>
+                  <% else %>
+                    <span class="text-sm text-gray-400 italic">No status</span>
+                  <% end %>
+                </td>
+
+                <!-- Comment -->
+                <td class="px-6 py-4">
+                  <% if call_log.comment.present? %>
+                    <div class="text-sm text-gray-900 max-w-xs">
+                      <% if call_log.comment.length > 100 %>
+                        <div data-controller="comment-display" 
+                             data-comment-display-full-comment-value="<%= call_log.comment.gsub('"', '&quot;') %>">
+                          <div data-comment-display-target="truncated">
+                            <%= truncate(call_log.comment, length: 100) %>
+                          </div>
+                          <button data-action="click->comment-display#toggleExpanded" 
+                                  data-comment-display-target="toggleButton"
+                                  class="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1">
+                            <span data-comment-display-target="toggleText">Show more</span>
+                          </button>
+                        </div>
+                      <% else %>
+                        <%= call_log.comment %>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <span class="text-sm text-gray-400 italic">No comment</span>
+                  <% end %>
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% if call_log.ncd.present? %>
+                    <div class="text-sm text-blue-600 font-medium">
+                      <%= call_log.ncd.strftime("%b %d, %Y") %>
+                    </div>
+                    <div class="text-xs text-gray-400">
+                      <%= call_log.ncd.strftime("%I:%M %p") %>
+                    </div>
+                  <% else %>
+                    <span class="text-sm text-gray-400 italic">Not set</span>
+                  <% end %>
+                </td>
+
+                <!-- Date & Time -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div>
+                    <%= call_log.created_at.strftime("%b %d, %Y") %>
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    <%= call_log.created_at.strftime("%I:%M %p") %>
+                  </div>
+                </td>
+
+                <!-- NCD -->
+                
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                <div class="flex flex-col items-center">
+                  <svg class="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <p class="text-lg font-medium text-gray-900 mb-2">No call logs found</p>
+                  <p class="text-gray-500">Try adjusting your filters to see more results.</p>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (if needed) -->
+    <% if @filtered_logs.respond_to?(:current_page) %>
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <%= paginate @filtered_logs %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Lead Details Drawer Modal -->
+<%= modal 'lead-details-modal', 
+      type: 'drawer-right', 
+      size: 'xxl', 
+      title: 'Lead Details',
+      show_close_button: true do %>
+  <!-- Content will be loaded here -->
+<% end %>
