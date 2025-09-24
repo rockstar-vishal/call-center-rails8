@@ -60,6 +60,7 @@ Rails.application.routes.draw do
       get :activity
       get :performance
       get :details
+      get :lead_details
     end
     resources :users do
       # Manager assignment routes

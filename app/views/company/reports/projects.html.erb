@@ -64,7 +64,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  <%= uniq_leads.size %>
+                  <%= link_to uniq_leads.size, lead_detail_path(project_ids: [project.id]), target: "_blank" %>
                 </span>
               </td>
             </tr>
@@ -92,7 +92,7 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-purple-900">
-                <%= total_uniq %>
+                <%= link_to total_uniq, lead_detail_path, target: "_blank" %>
               </span>
             </td>
           </tr>

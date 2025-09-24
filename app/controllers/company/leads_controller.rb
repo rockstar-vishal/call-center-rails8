@@ -209,7 +209,17 @@ class Company::LeadsController < Company::BaseController
   end
 
   def set_lead
-    @lead = @leads.find(params[:id])
+    begin
+      @lead = @leads.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      # If lead is not accessible through normal means, check if user has call logs for this lead
+      # This allows viewing leads in reports even if they're not currently accessible
+      if current_user.call_logs.exists?(lead_id: params[:id])
+        @lead = current_company.leads.find(params[:id])
+      else
+        raise ActiveRecord::RecordNotFound
+      end
+    end
   end
 
   def set_leads

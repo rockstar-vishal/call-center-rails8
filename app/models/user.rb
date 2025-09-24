@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :managers, through: :user_managers, source: :manager
 
   has_many :leads, dependent: :restrict_with_error
+  has_many :call_logs, class_name: "::Leads::CallLog"
   
   has_many :managed_user_relationships, class_name: 'UserManager', foreign_key: 'manager_id', dependent: :destroy
   has_many :subordinates, through: :managed_user_relationships, source: :user

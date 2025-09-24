@@ -53,16 +53,23 @@ class Company::ReportsController < Company::BaseController
 
 	def lead_details
 		@filtered_logs = filter_call_logs @call_logs
-		uniq_lead_ids = @filtered_logs.map(&:lead_id)
-		@leads = current_company.leads.where(id: uniq_lead_ids).accessible_by(current_user)
+		# Get unique lead IDs from filtered logs
+		lead_ids = @filtered_logs.distinct.pluck(:lead_id)
+		# Show all leads that have call logs (maintain data integrity)
+		@leads = current_company.leads.where(id: lead_ids)
+		
 		# Set result count for display
-		@result_count = @filtered_logs.count
+		@result_count = @leads.count
 	end
 
 	def detail_path args=nil
 		return company_reports_details_path(created_at_from: @start_date.to_date, created_at_upto: @end_date.to_date, user_ids: params[:user_ids], status_ids: params[:status_ids], project_ids: params[:project_ids], **args)
 	end
-	helper_method :detail_path
+
+	def lead_detail_path args=nil
+		return company_reports_lead_details_path(created_at_from: @start_date.to_date, created_at_upto: @end_date.to_date, user_ids: params[:user_ids], status_ids: params[:status_ids], project_ids: params[:project_ids], **args)
+	end
+	helper_method :detail_path, :lead_detail_path
 
 	private
 
