@@ -63,8 +63,17 @@
                            data-lead-opener-name-value="<%= lead.name %>">
                         <%= lead.name %>
                         <% if lead.code.present? %>
-                          <div class="text-xs text-gray-500 mt-1">
-                            Code: <%= lead.code %>
+                          <div class="text-xs text-gray-500 mt-1 flex items-center space-x-1">
+                            <span>Code: <%= lead.code %></span>
+                            <button data-controller="clipboard"
+                                    data-clipboard-text-value="<%= lead.code %>"
+                                    data-action="click->clipboard#copy"
+                                    class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+                                    title="Copy lead code">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                              </svg>
+                            </button>
                           </div>
                         <% end %>
                       </div>

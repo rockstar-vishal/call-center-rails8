@@ -20,6 +20,8 @@ class User < ApplicationRecord
 
   validates :email, presence: true
 
+  scope :admins, -> {joins(:role).where(role: {tag: "admin"})}
+
   # Role checking methods
   def sysadmin?
     role.tag == 'sysad'

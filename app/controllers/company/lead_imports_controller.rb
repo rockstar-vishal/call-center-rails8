@@ -76,14 +76,6 @@ class Company::LeadImportsController < Company::BaseController
     CSV.foreach(file.path, headers: true, header_converters: :symbol) do |row|
       begin
         lead_params = extract_lead_params(row)
-        
-        # Skip if lead with same email already exists
-        if current_company.leads.exists?(email: lead_params[:email])
-          results[:errors] << "Lead with email #{lead_params[:email]} already exists"
-          results[:error_count] += 1
-          next
-        end
-
         lead = current_company.leads.build(lead_params)
         
         if lead.save
@@ -126,6 +118,9 @@ class Company::LeadImportsController < Company::BaseController
     if row[:project].present?
       project = current_company.projects.find_by(name: row[:project])
       params[:project_id] = project&.id
+    elsif row[:project_code].present?
+      project = current_company.projects.find_by(code: row[:project_code])
+      params[:project_id] = project&.id
     end
     
     # Find status by name
@@ -150,7 +145,7 @@ class Company::LeadImportsController < Company::BaseController
       csv << [
         "Name",
         "Email", 
-        "Phone Number",
+        "Phone",
         "Project",
         "Status", 
         "Assigned To",

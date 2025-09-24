@@ -19,7 +19,26 @@ class Company::LeadsController < Company::BaseController
       @search_active = search_params.any?
     end
     
-    @leads = @leads.order("leads.ncd asc nulls first, leads.created_at desc").page(params[:page]).per(PER_PAGE)
+    respond_to do |format|
+      format.html do
+        @leads = @leads.order("leads.ncd asc nulls first, leads.created_at desc").page(params[:page]).per(PER_PAGE)
+      end
+      format.csv do
+        # Check admin access for CSV export
+        unless current_user.admin?
+          flash[:alert] = "You don't have permission to export leads."
+          redirect_to company_leads_path and return
+        end
+        
+        # Export with limit of 1000 records, no pagination
+        @leads = @leads.order("leads.ncd asc nulls first, leads.created_at desc").limit(1000)
+        
+        send_data generate_csv(@leads), 
+                  filename: "leads_export_#{Date.current.strftime('%Y%m%d')}.csv",
+                  type: 'text/csv',
+                  disposition: 'attachment'
+      end
+    end
   end
 
   def show
@@ -224,6 +243,54 @@ class Company::LeadsController < Company::BaseController
 
   def set_leads
     @leads = Lead.accessible_by(current_user)
+  end
+
+  def generate_csv(leads)
+    require 'csv'
+    
+    CSV.generate(headers: true) do |csv|
+      # Add CSV headers
+      csv << [
+        'Lead Code',
+        'Name', 
+        'Phone',
+        'Email',
+        'Project',
+        'Status',
+        'Assigned To',
+        'Next Call Date',
+        'Comments',
+        'Created Date',
+        'Updated Date',
+        'Total Calls',
+        'Last Call Date',
+        'Last Call Status',
+        'Last Call Comment'
+      ]
+      
+      # Add data rows
+      leads.each do |lead|
+        last_call = lead.call_logs.order(:created_at).last
+        
+        csv << [
+          lead.code,
+          lead.name,
+          lead.phone,
+          lead.email,
+          lead.project&.name,
+          lead.status&.name,
+          lead.user&.name,
+          lead.ncd&.strftime('%Y-%m-%d %H:%M:%S'),
+          lead.comment,
+          lead.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+          lead.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+          lead.call_logs.count,
+          last_call&.created_at&.strftime('%Y-%m-%d %H:%M:%S'),
+          last_call&.status&.name,
+          last_call&.comment
+        ]
+      end
+    end
   end
 
   def set_call_log

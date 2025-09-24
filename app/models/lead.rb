@@ -19,6 +19,7 @@ class Lead < ApplicationRecord
   def set_defaults
     self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
+    self.user_id = self.company.users.admins.first&.id if self.user_id.blank?
     self.user_assinged_on = Time.zone.now
     self.churn_count = 0
   end

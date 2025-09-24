@@ -1,4 +1,6 @@
 class Project < ApplicationRecord
+  include ::Codeable
+  CODEABLE = {prefix: "PR", length: 4}
   belongs_to :company
   has_many :leads, dependent: :restrict_with_error
   has_rich_text :reading_material
