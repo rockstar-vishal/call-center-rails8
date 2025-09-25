@@ -16,6 +16,28 @@ class Lead < ApplicationRecord
 
   before_update :set_user_assinged_on
 
+  after_commit :inform_crm, if: :should_inform_crm
+
+  # Role-based filtering scope
+  scope :accessible_by, ->(user) {
+    case user.role.tag
+    when 'admin'
+      # Admins can see all company leads
+      where(company: user.company)
+    when 'manager'
+      # Managers can see their own leads + subordinates' leads
+      subordinate_ids = user.subordinates.pluck(:id)
+      accessible_user_ids = [user.id] + subordinate_ids
+      where(company: user.company, user_id: accessible_user_ids)
+    when 'executive'
+      # Executives can only see their own leads
+      where(company: user.company, user_id: user.id)
+    else
+      # Default: no access
+      none
+    end
+  }
+
   def set_defaults
     self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
@@ -38,25 +60,15 @@ class Lead < ApplicationRecord
     end
   end
 
-  # Role-based filtering scope
-  scope :accessible_by, ->(user) {
-    case user.role.tag
-    when 'admin'
-      # Admins can see all company leads
-      where(company: user.company)
-    when 'manager'
-      # Managers can see their own leads + subordinates' leads
-      subordinate_ids = user.subordinates.pluck(:id)
-      accessible_user_ids = [user.id] + subordinate_ids
-      where(company: user.company, user_id: accessible_user_ids)
-    when 'executive'
-      # Executives can only see their own leads
-      where(company: user.company, user_id: user.id)
-    else
-      # Default: no access
-      none
-    end
-  }
+  def inform_crm
+    http_service = HttpService.new(self)
+    response = http_service.migrate_hot_lead_to_crm
+  end
+
+  def should_inform_crm
+    return true if self.status&.tag == "hot" && self.crm_created.blank?
+    return false
+  end
 
   class << self
     # Alternative class method for API usage
