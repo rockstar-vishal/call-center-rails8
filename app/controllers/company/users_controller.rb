@@ -62,7 +62,14 @@ class Company::UsersController < Company::BaseController
   end
 
   def user_params
-    params.require(:user).permit(:name, :email, :phone, :assignee_email, :role_id)
+    permitted_params = [:name, :email, :phone, :assignee_email, :role_id]
+    
+    # Only allow password parameters if they are provided (for updates)
+    if params[:user][:password].present?
+      permitted_params += [:password, :password_confirmation]
+    end
+    
+    params.require(:user).permit(permitted_params)
   end
 
   def ensure_admin
