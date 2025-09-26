@@ -2,10 +2,19 @@ class LeadsChannel < ApplicationCable::Channel
   def subscribed
     # Subscribe to all leads for the current user's company
     stream_from "leads_#{current_user.company_id}"
+    
+    # Send initial heartbeat to establish connection
+    transmit({ type: 'connected', timestamp: Time.current.to_i })
   end
 
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
+    logger.info "LeadsChannel unsubscribed for user #{current_user.id}"
+  end
+  
+  # Handle heartbeat to keep connection alive
+  def heartbeat
+    transmit({ type: 'heartbeat', timestamp: Time.current.to_i })
   end
 
   def self.broadcast_lead_update(lead)

@@ -1,119 +1,109 @@
 import { Controller } from "@hotwired/stimulus"
 import { createConsumer } from "@rails/actioncable"
 
-// Connects to data-controller="action-cable"
 export default class extends Controller {
   static values = { 
     channel: String,
-    companyId: String 
+    companyId: String
   }
 
   connect() {
-    this.consumer = createConsumer()
-    this.subscribe()
+    this.establishConnection()
+    this.setupHeartbeat()
   }
 
   disconnect() {
-    if (this.subscription) {
-      this.subscription.unsubscribe()
-    }
+    this.cleanup()
   }
 
-  subscribe() {
-    if (this.channelValue && this.companyIdValue) {
-      this.subscription = this.consumer.subscriptions.create(
-        { 
-          channel: this.channelValue
+  establishConnection() {
+    // Create ActionCable consumer with connection management
+    this.consumer = createConsumer()
+    
+    // Subscribe to the leads channel
+    this.subscription = this.consumer.subscriptions.create(
+      {
+        channel: this.channelValue,
+        company_id: this.companyIdValue
+      },
+      {
+        connected: () => {
+          console.log("ActionCable connected")
+          this.connectionActive = true
         },
-        {
-          connected: () => {
-            // Connection established
-          },
-          disconnected: () => {
-            // Connection lost
-          },
-          received: (data) => {
-            this.handleMessage(data)
-          }
+        
+        disconnected: () => {
+          console.log("ActionCable disconnected")
+          this.connectionActive = false
+          // Attempt to reconnect after a delay
+          setTimeout(() => this.attemptReconnect(), 5000)
+        },
+        
+        received: (data) => {
+          this.handleMessage(data)
         }
-      )
-    }
+      }
+    )
   }
 
   handleMessage(data) {
-    switch (data.type) {
+    switch(data.type) {
+      case 'connected':
+        console.log("Channel connected at", new Date(data.timestamp * 1000))
+        break
+        
+      case 'heartbeat':
+        // Update last heartbeat timestamp
+        this.lastHeartbeat = Date.now()
+        break
+        
+      case 'lead_created':
       case 'lead_update':
         this.handleLeadUpdate(data)
         break
-      case 'lead_created':
-        this.handleLeadCreated(data)
-        break
+        
       default:
-        // Unknown message type - ignore silently
+        console.log("Unknown message type:", data.type)
     }
   }
 
   handleLeadUpdate(data) {
-    // Update the lead row in the table
-    const leadRow = document.getElementById(`lead-row-${data.lead_id}`)
-    if (leadRow) {
-      this.updateLeadRow(leadRow, data.data)
+    // Refresh the leads list when updates are received
+    if (window.location.pathname.includes('/leads')) {
+      // Use Turbo to refresh the page content
+      Turbo.visit(window.location.href, { action: 'replace' })
     }
   }
 
-  handleLeadCreated(data) {
-    // For new leads, refresh the page to ensure proper ordering and pagination
-    window.location.reload()
-  }
-
-  updateLeadRow(leadRow, data) {
-    // Update name (first cell with lead name)
-    const nameCell = leadRow.querySelector('td:first-child .text-gray-900')
-    if (nameCell) nameCell.textContent = data.name
-
-    // Update status (third cell with status badge)
-    const statusCell = leadRow.querySelector('td:nth-child(3) span')
-    if (statusCell) {
-      statusCell.textContent = data.status
-      // Update status badge classes
-      statusCell.className = `inline-flex px-2 py-1 text-xs font-semibold rounded-full ${this.getStatusBadgeClass(data.status)}`
-    }
-
-    // Update comment (last cell with comment display)
-    const commentCell = leadRow.querySelector('td:last-child .comment-content')
-    if (commentCell) {
-      if (data.comment && data.comment.trim()) {
-        const truncatedComment = data.comment.length > 100 ? data.comment.substring(0, 100) + "..." : data.comment
-        commentCell.innerHTML = this.formatComment(truncatedComment)
-      } else {
-        commentCell.innerHTML = '<span class="text-gray-400 italic">No comments</span>'
+  setupHeartbeat() {
+    // Send heartbeat every 30 seconds to keep connection alive
+    this.heartbeatInterval = setInterval(() => {
+      if (this.subscription && this.connectionActive) {
+        this.subscription.perform('heartbeat')
       }
+    }, 30000)
+  }
+
+  attemptReconnect() {
+    if (!this.connectionActive) {
+      console.log("Attempting to reconnect ActionCable...")
+      this.establishConnection()
     }
   }
 
-  formatComment(comment) {
-    if (!comment) return ''
+  cleanup() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+    }
     
-    // Convert \n to <br> and limit length
-    const formatted = comment.replace(/\n/g, '<br>')
-    if (formatted.length > 100) {
-      return formatted.substring(0, 100) + '...'
+    if (this.subscription) {
+      this.subscription.unsubscribe()
     }
-    return formatted
-  }
-
-  getStatusBadgeClass(status) {
-    const statusClasses = {
-      'Call Back Today': 'bg-yellow-100 text-yellow-800',
-      'Interested': 'bg-green-100 text-green-800',
-      'Not Interested': 'bg-red-100 text-red-800',
-      'Follow Up': 'bg-blue-100 text-blue-800',
-      'New': 'bg-gray-100 text-gray-800',
-      'Contacted': 'bg-blue-100 text-blue-800',
-      'Converted': 'bg-green-100 text-green-800',
-      'Lost': 'bg-red-100 text-red-800'
+    
+    if (this.consumer) {
+      this.consumer.disconnect()
     }
-    return statusClasses[status] || 'bg-gray-100 text-gray-800'
+    
+    this.connectionActive = false
   }
-
 }
