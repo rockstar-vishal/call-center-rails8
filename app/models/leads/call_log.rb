@@ -20,19 +20,19 @@ class Leads::CallLog < ApplicationRecord
   end
 
   def update_lead
-    self.lead.status_id = self.status_id if self.status.present?
-    self.lead.ncd = self.ncd if self.ncd.present?
     if self.comment.present?
+      self.lead.status_id = self.status_id if self.status.present?
+      self.lead.ncd = self.ncd if self.ncd.present?
       self.lead.comment = "#{self.lead.comment} \n(#{self.user.name} @ #{Time.zone.now.strftime("%d-%b %I:%M %p")}) #{self.comment}"
-    end
-    
-    unless self.lead.save
-      # Add lead validation errors to call log errors
-      self.lead.errors.full_messages.each do |message|
-        self.errors.add(:base, "Lead update failed: #{message}")
+      
+      unless self.lead.save
+        # Add lead validation errors to call log errors
+        self.lead.errors.full_messages.each do |message|
+          self.errors.add(:base, "Lead update failed: #{message}")
+        end
+        # Prevent the call log from being saved
+        throw :abort
       end
-      # Prevent the call log from being saved
-      throw :abort
     end
   end
 

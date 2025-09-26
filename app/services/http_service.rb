@@ -37,17 +37,17 @@ class HttpService
   end
 
   def build_url
-    "#{@lead.company.crm_domain}/public/telecalling/leads"
+    @lead.company.crm_domain
   end
 
   def build_payload
     {
       name: @lead.name,
-      phone: @lead.phone,
+      mobile: @lead.phone,
       email: @lead.email,
-      comment: @lead.comment,
-      project: @lead.project&.name,
-      telecaller_name: @lead.user&.name
+      project_name: @lead.project&.name,
+      telecaller_name: @lead.user&.name,
+      assigned_to_email: @lead.user&.assignee_email
     }
   end
 

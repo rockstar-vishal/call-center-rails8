@@ -62,7 +62,7 @@ class Company::UsersController < Company::BaseController
   end
 
   def user_params
-    params.require(:user).permit(:name, :email, :phone, :role_id)
+    params.require(:user).permit(:name, :email, :phone, :assignee_email, :role_id)
   end
 
   def ensure_admin

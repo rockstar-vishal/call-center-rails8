@@ -19,6 +19,7 @@ class User < ApplicationRecord
   has_many :subordinates, through: :managed_user_relationships, source: :user
 
   validates :email, presence: true
+  validates :assignee_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, allow_blank: true
 
   scope :admins, -> {joins(:role).where(role: {tag: "admin"})}
 
