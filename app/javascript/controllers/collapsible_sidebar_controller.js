@@ -8,13 +8,19 @@ export default class extends Controller {
     this.isCollapsed = false
     this.hoverTimeout = null
     
-    // Start in collapsed state for more working space
-    setTimeout(() => {
-      this.collapse()
-    }, 1000) // Collapse after 1 second
+    // Only apply desktop behavior on large screens
+    if (window.innerWidth >= 1024) {
+      // Start in expanded state, then collapse after delay
+      setTimeout(() => {
+        this.collapse()
+      }, 1000) // Collapse after 1 second
+    }
   }
 
   mouseEnter() {
+    // Only apply desktop behavior on large screens
+    if (window.innerWidth < 1024) return
+    
     // Clear any pending collapse
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout)
@@ -28,6 +34,9 @@ export default class extends Controller {
   }
 
   mouseLeave() {
+    // Only apply desktop behavior on large screens
+    if (window.innerWidth < 1024) return
+    
     // Delay collapse to prevent flickering
     this.hoverTimeout = setTimeout(() => {
       this.collapse()
@@ -37,13 +46,16 @@ export default class extends Controller {
   expand() {
     this.isCollapsed = false
     
+    // Only apply desktop behavior on large screens
+    if (window.innerWidth < 1024) return
+    
     // Expand sidebar
     this.sidebarTarget.classList.remove('w-16')
     this.sidebarTarget.classList.add('w-64')
     
     // Adjust content margin
-    this.contentTarget.classList.remove('ml-16')
-    this.contentTarget.classList.add('ml-64')
+    this.contentTarget.classList.remove('lg:ml-16')
+    this.contentTarget.classList.add('lg:ml-64')
     
     // Show text elements
     this.navTextTargets.forEach(element => {
@@ -70,13 +82,16 @@ export default class extends Controller {
   collapse() {
     this.isCollapsed = true
     
+    // Only apply desktop behavior on large screens
+    if (window.innerWidth < 1024) return
+    
     // Collapse sidebar
     this.sidebarTarget.classList.remove('w-64')
     this.sidebarTarget.classList.add('w-16')
     
     // Adjust content margin
-    this.contentTarget.classList.remove('ml-64')
-    this.contentTarget.classList.add('ml-16')
+    this.contentTarget.classList.remove('lg:ml-64')
+    this.contentTarget.classList.add('lg:ml-16')
     
     // Hide text elements
     this.navTextTargets.forEach(element => {

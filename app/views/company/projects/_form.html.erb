@@ -1,5 +1,5 @@
-<div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-xl w-full space-y-8">
+<div class="py-6 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-xl mx-auto w-full space-y-6 lg:space-y-8">
     <!-- Header Section -->
     <div class="text-center">
       <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg">
@@ -13,7 +13,7 @@
           </svg>
         <% end %>
       </div>
-      <h2 class="mt-6 text-3xl font-bold text-gray-900">
+      <h2 class="mt-4 lg:mt-6 text-2xl lg:text-3xl font-bold text-gray-900">
         <%= @project.persisted? ? "Edit Project" : "Create New Project" %>
       </h2>
       <p class="mt-2 text-sm text-gray-600">
@@ -22,8 +22,8 @@
     </div>
 
     <!-- Form Card -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-2xl rounded-3xl border border-gray-200/50">
-      <%= form_with(model: [:company, @project], local: true, class: "p-8 space-y-8") do |form| %>
+    <div class="bg-white/80 backdrop-blur-sm shadow-2xl rounded-2xl lg:rounded-3xl border border-gray-200/50">
+      <%= form_with(model: [:company, @project], local: true, class: "p-4 lg:p-8 space-y-6 lg:space-y-8") do |form| %>
         <!-- Error Messages -->
         <% if @project.errors.any? %>
           <div class="rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200 p-6">
@@ -51,7 +51,7 @@
         <% end %>
 
         <!-- Form Fields -->
-        <div class="space-y-8">
+        <div class="space-y-6 lg:space-y-8">
           <!-- Project Name -->
           <div>
             <%= form.label :name, class: "block text-base font-semibold text-gray-700 mb-3" do %>
@@ -63,13 +63,13 @@
               </span>
             <% end %>
             <%= form.text_field :name, 
-                  class: "w-full py-4 px-6 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg bg-white/50 backdrop-blur-sm", 
+                  class: "w-full py-3 lg:py-4 px-4 lg:px-6 border border-gray-300 rounded-xl lg:rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base lg:text-lg bg-white/50 backdrop-blur-sm", 
                   placeholder: "Enter project name..." %>
           </div>
 
           <!-- Project Stats (Only for existing projects) -->
           <% if @project.persisted? %>
-            <div class="bg-gray-50 rounded-2xl p-6 space-y-4">
+            <div class="bg-gray-50 rounded-xl lg:rounded-2xl p-4 lg:p-6 space-y-4">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -77,7 +77,7 @@
                 Project Statistics
               </h3>
               
-              <div class="grid grid-cols-2 gap-6">
+              <div class="grid grid-cols-2 gap-4 lg:gap-6">
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-600"><%= @project.leads.count %></div>
                   <div class="text-sm text-gray-600">Total Leads</div>
@@ -92,7 +92,7 @@
 
           <!-- Training Content (Admin Only) -->
           <% if current_user.admin? %>
-            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-200">
+            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-purple-200">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <svg class="h-5 w-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
@@ -100,7 +100,7 @@
                 Training Materials
               </h3>
               
-              <div class="space-y-6">
+              <div class="space-y-4 lg:space-y-6">
                 <!-- Training Website URL -->
                 <div>
                   <%= form.label :training_website_url, class: "block text-sm font-medium text-gray-700 mb-2" do %>
@@ -112,7 +112,7 @@
                     </span>
                   <% end %>
                   <%= form.url_field :training_website_url, 
-                        class: "w-full py-3 px-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/70", 
+                        class: "w-full py-2 lg:py-3 px-3 lg:px-4 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/70 text-sm lg:text-base", 
                         placeholder: "https://example.com/training" %>
                 </div>
 
@@ -127,7 +127,7 @@
                     </span>
                   <% end %>
                   <%= form.url_field :training_video, 
-                        class: "w-full py-3 px-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/70", 
+                        class: "w-full py-2 lg:py-3 px-3 lg:px-4 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/70 text-sm lg:text-base", 
                         placeholder: "https://youtube.com/watch?v=..." %>
                 </div>
 
@@ -141,9 +141,9 @@
                       Reading Material
                     </span>
                   <% end %>
-                  <div class="bg-white/70 rounded-xl border border-gray-300 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
+                  <div class="bg-white/70 rounded-lg lg:rounded-xl border border-gray-300 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
                     <%= form.rich_text_area :reading_material, 
-                          class: "w-full min-h-[200px] p-4 border-0 rounded-xl focus:outline-none resize-y", 
+                          class: "w-full min-h-[150px] lg:min-h-[200px] p-3 lg:p-4 border-0 rounded-lg lg:rounded-xl focus:outline-none resize-y text-sm lg:text-base", 
                           placeholder: "Add detailed reading material, instructions, guidelines, or any other training content..." %>
                   </div>
                   <p class="mt-1 text-xs text-purple-600">Use the rich text editor to format your content with headings, lists, links, and more</p>

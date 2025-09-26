@@ -67,7 +67,7 @@ class Company::LeadsController < Company::BaseController
       LeadsChannel.broadcast_lead_creation(@lead)
       
       flash[:notice] = 'Lead was successfully created.'
-      redirect_to company_lead_path(@lead)
+      redirect_to company_leads_path
     else
       @projects = current_company.projects.order(:name)
       @statuses = Status.order(:name)

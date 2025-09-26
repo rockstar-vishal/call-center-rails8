@@ -1,9 +1,9 @@
 <% content_for :page_title, "New Lead" %>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-12">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 py-4 lg:py-12">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-12 hidden lg:block">
       <h1 class="text-3xl font-bold text-gray-900 mb-4">Add New Lead</h1>
       <p class="text-lg text-gray-600">Capture a new lead and add them to your pipeline</p>
     </div>
@@ -14,7 +14,7 @@
         
         <!-- Error Messages -->
         <% if @lead.errors.any? %>
-          <div class="p-8 pb-0">
+          <div class="p-4 lg:p-8 pb-0">
             <div class="rounded-2xl bg-red-50 border border-red-200 p-6">
               <div class="flex">
                 <div class="flex-shrink-0">
@@ -42,7 +42,7 @@
 
         <!-- Lead Limit Warning -->
         <% if current_company.lead_limit.present? %>
-          <div class="p-8 pb-0">
+          <div class="p-4 lg:p-8 pb-0">
             <% if current_company.lead_limit_reached? %>
               <div class="rounded-2xl bg-red-50 border border-red-200 p-6">
                 <div class="flex">
@@ -82,7 +82,7 @@
         <% end %>
 
         <!-- Form Fields -->
-        <div class="p-8 space-y-10">
+        <div class="p-4 lg:p-8 space-y-6 lg:space-y-10">
           
           <!-- Contact Information Section -->
           <div class="space-y-6">
@@ -203,7 +203,7 @@
         </div>
 
         <!-- Form Actions -->
-        <div class="bg-gray-50/80 backdrop-blur-sm px-8 py-6 flex justify-end space-x-4">
+        <div class="bg-gray-50/80 backdrop-blur-sm px-4 lg:px-8 py-4 lg:py-6 flex justify-end space-x-4">
           <%= link_to "Cancel", company_leads_path, 
                 class: "inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-2xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" %>
           <%= form.submit "Create Lead", 
