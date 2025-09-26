@@ -60,6 +60,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "code"
+    t.index ["domain"], name: "index_companies_on_domain", unique: true
   end
 
   create_table "leads", force: :cascade do |t|
@@ -80,9 +81,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.datetime "user_assinged_on"
     t.integer "churn_count"
     t.string "code"
+    t.index ["company_id", "project_id"], name: "index_leads_on_company_id_and_project_id"
+    t.index ["company_id", "status_id"], name: "index_leads_on_company_id_and_status_id"
+    t.index ["company_id", "user_assinged_on"], name: "index_leads_on_company_id_and_user_assinged_on"
     t.index ["company_id"], name: "index_leads_on_company_id"
+    t.index ["created_at"], name: "index_leads_on_created_at"
+    t.index ["project_id", "status_id"], name: "index_leads_on_project_id_and_status_id"
     t.index ["project_id"], name: "index_leads_on_project_id"
     t.index ["status_id"], name: "index_leads_on_status_id"
+    t.index ["updated_at"], name: "index_leads_on_updated_at"
+    t.index ["user_assinged_on", "status_id"], name: "index_leads_on_user_assinged_on_and_status_id"
+    t.index ["user_assinged_on"], name: "index_leads_on_user_assinged_on"
     t.index ["user_id"], name: "index_leads_on_user_id"
   end
 
@@ -95,9 +104,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "company_id", null: false
+    t.index ["company_id", "created_at"], name: "index_leads_call_logs_on_company_id_and_created_at"
+    t.index ["company_id", "user_id", "created_at"], name: "index_leads_call_logs_on_company_id_and_user_id_and_created_at"
+    t.index ["company_id", "user_id"], name: "index_leads_call_logs_on_company_id_and_user_id"
     t.index ["company_id"], name: "index_leads_call_logs_on_company_id"
+    t.index ["created_at"], name: "index_leads_call_logs_on_created_at"
+    t.index ["lead_id", "created_at"], name: "index_leads_call_logs_on_lead_id_and_created_at"
     t.index ["lead_id"], name: "index_leads_call_logs_on_lead_id"
     t.index ["status_id"], name: "index_leads_call_logs_on_status_id"
+    t.index ["user_id", "created_at"], name: "index_leads_call_logs_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_leads_call_logs_on_user_id"
   end
 
@@ -110,6 +125,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.string "training_video"
     t.string "code"
     t.index ["company_id"], name: "index_projects_on_company_id"
+    t.index ["created_at"], name: "index_projects_on_created_at"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -117,6 +133,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.string "tag"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["tag"], name: "index_roles_on_tag", unique: true
   end
 
   create_table "sources", force: :cascade do |t|
@@ -124,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.string "tag"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["tag"], name: "index_sources_on_tag"
   end
 
   create_table "statuses", force: :cascade do |t|
@@ -131,6 +149,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.string "tag"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["tag"], name: "index_statuses_on_tag", unique: true
   end
 
   create_table "user_managers", force: :cascade do |t|
@@ -159,6 +178,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_26_093347) do
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.string "code"
+    t.index ["assignee_email"], name: "index_users_on_assignee_email"
+    t.index ["company_id", "role_id"], name: "index_users_on_company_id_and_role_id"
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

@@ -17,6 +17,8 @@ class Company::LeadsController < Company::BaseController
     elsif search_params.any?
       @leads = @leads.smart_search(search_params)
       @search_active = search_params.any?
+    else
+      @leads = @leads.live_only
     end
     
     respond_to do |format|

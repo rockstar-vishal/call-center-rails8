@@ -38,6 +38,10 @@ class Lead < ApplicationRecord
     end
   }
 
+  scope :live_only, -> {
+    where.not(status: Status.where(tag: ["hot", "dead"]))
+  }
+
   def set_defaults
     self.status_id = Status.find_by_tag("new")&.id if self.status_id.blank?
     self.project_id = self.company.projects.first&.id if self.company.projects.count == 1
@@ -82,8 +86,8 @@ class Lead < ApplicationRecord
       # Search across name, phone, and email fields
       sanitized_query = sanitize_sql_like(query.strip)
       where(
-        "leads.name ILIKE ? OR leads.phone ILIKE ? OR leads.email ILIKE ?",
-        "%#{sanitized_query}%", "%#{sanitized_query}%", "%#{sanitized_query}%"
+        "leads.name ILIKE ? OR leads.phone ILIKE ? OR leads.email ILIKE ? OR leads.code ILIKE ?",
+        "%#{sanitized_query}%", "%#{sanitized_query}%", "%#{sanitized_query}%", "#{sanitized_query}"
       )
     end
 
